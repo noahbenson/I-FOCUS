@@ -73,7 +73,30 @@ then the command that should actually be entered is **`echo nben@uw.edu`**.
    directory.  
    First, we need to make sure that the directory exists: **`mkdir -p ~/.ssh`**  
    Next, we want to navigate into it: **`cd ~/.ssh`**
-
+3. In order to tell SSH about Hyak, we need to edit the `config` file that lives
+   in this `.ssh` directory. If you are familiar with a Unix text editor like
+   vim or emacs, feel free to use it for this step; if not, we will use `nano`,
+   which is a very simple built-in text editor. (See [this
+   page](https://tech.wayne.edu/kb/high-performance-computing/hpc-tutorials/500111)
+   for introductory instructions on how to use nano.  
+   To use `nano` to open the `config` file: **`nano config`**  
+   This should open nano, which will redraw the text in your terminal. If the
+   `config` file already contains text, that's okay--just go to the bottom of
+   the file using the down key and add the following text (if the file appears
+   empty, just add this at the top):  
+   ```
+   Host hyak
+     HostName klone.hyak.uw.edu
+     User <NetID>
+     LocalForward 7777 /mmfs1/home/<NetID>/.tunnels/singularity-jupyter/default.login.sock
+   ```  
+   Note that the two occurrences of `<NetID>` above need to be replaced with
+   your NetID.  
+   Once you have entered the text above, you can save the file by pressing
+   control+O (O for "write **o**utput") and pressing enter when it prompts you
+   to edit the filename then pressing control+X (X for "e**x**it"). There is a
+   key of these keyboard commands at the bottom of the nano screen; the `^`
+   symbol stands for control, so `^X` means control+X.
 
 
 ## Logging into Hyak
