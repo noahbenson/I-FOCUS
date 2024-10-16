@@ -1,0 +1,73 @@
+#! /bin/bash
+
+# If Jupyter is already running, just error our right away
+jupyter-query.sh && {
+    echo "Jupyter is already running:"
+    jupyter-query.sh print
+    exit 1
+}
+
+# Utility stuff.
+function die {
+    echo "ERROR:" "$@" 1>&2
+    exit 1
+}
+
+# Next, configuration (via environment variables):
+IMAGE="${IMAGE:-docker://quay.io/jupyter/datascience-notebook:2024-10-02}"
+JUPYTER_START_CMD="${JUPYTER_START_CMD:-${HOME}/bin/worker/jupyter-start.sh}"
+TUNNELS_DIR="${TUNNELS_DIR:-${HOME}/.tunnels}"
+TUNNEL_NAME="${TUNNEL_NAME:-singularity-jupyter}"
+JUPYTER_ENABLE_LAB="${JUPYTER_ENABLE_LAB:-yes}"
+SOCKET_NAME="default"
+
+# Make sure we can create a tunnel directory.
+TUNNEL_DIR="${TUNNELS_DIR}/${TUNNEL_NAME}"
+mkdir -p "${TUNNEL_DIR}" \
+    || die "Could not make tunnel directory: ${TUNNEL_DIR}"
+
+# If a previous run's scripts and such are still present, clear them out.
+SOCKET_FILE="${TUNNEL_DIR}/${SOCKET_NAME}.sock"
+LOGIN_FILE="${TUNNEL_DIR}/${SOCKET_NAME}.login.sock"
+JOB_FILE="${TUNNEL_DIR}/jobdata.sh"
+RUN_SCRIPT="${TUNNEL_DIR}/run.sh"
+[ -e "${SOCKET_FILE}" ] && rm "${SOCKET_FILE}"
+[ -e "${LOGIN_FILE}" ] && rm "${LOGIN_FILE}"
+[ -e "${JOB_FILE}" ] && rm "${JOB_FILE}"
+[ -e "${RUN_SCRIPT}" ] && rm "${RUN_SCRIPT}"
+
+# At this point, if we are not in a screen, put us in one.
+if [ -z "$STY" ]
+then exec screen /bin/bash "$0" "$@"
+else screen caption always \
+         "%{= RW}To detach, press control + a then d. To reattach: screen -x"
+     screen screen jupyter-tunnel.sh
+     screen caption always \
+         "%{= RW}To detach, press control + a then d. To reattach: screen -x"
+fi
+
+# Everything checks out; we can export our environment and run it now.
+echo "Starting Jupyter using socket '${SOCKET_NAME}'."
+
+JOBOUT="${TUNNEL_DIR}/startup.out"
+JOBERR="${TUNNEL_DIR}/startup.err"
+
+export IMAGE
+export TUNNELS_DIR
+export TUNNEL_NAME
+export JUPYTER_ENABLE_LAB
+export SOCKET_NAME
+export TUNNEL_DIR
+export SOCKET_FILE
+export LOGIN_FILE
+export JOB_FILE
+export RUN_SCRIPT
+
+echo "Queuing job: ${JUPYTER_START_CMD}"
+srun "$@" --pty /bin/bash "${JUPYTER_START_CMD}" "${SOCKET_NAME}"
+echo "Jupyter exited with status $?."
+
+# Cleanup:
+[ -e "${SOCKET_FILE}" ] && rm "${SOCKET_FILE}"
+
+read -n1 -p "Press enter to exit." KEYPRESS
