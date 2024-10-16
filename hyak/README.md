@@ -93,15 +93,32 @@ then the command that should actually be entered is **`echo nben@uw.edu`**.
    Note that the two occurrences of `<NetID>` above need to be replaced with
    your NetID.  
    Once you have entered the text above, you can save the file by pressing
-   control+O (O for "write **o**utput") and pressing enter when it prompts you
-   to edit the filename then pressing control+X (X for "e**x**it"). There is a
+   control+O (O for "write _o_utput") and pressing enter when it prompts you
+   to edit the filename then pressing control+X (X for "e_x_it"). There is a
    key of these keyboard commands at the bottom of the nano screen; the `^`
    symbol stands for control, so `^X` means control+X.
 
 
-## Logging into Hyak
+## (3) Logging into Hyak
 
-...
+Once you have followed the steps in [(2)](#2-configuring-ssh), you should be
+able to log into Hyak using the command **`ssh hyak`**. The first time you enter
+this command, you may be given a prompt about the authenticity of the host; it
+typically ends with `Are you sure you want to continue connecting
+(yes/no/[fingerprint])?`.  It is typically safe to answer `yes` to this
+question, and you should only be prompted the first time you connect on each
+computer. (If you happen to be on a network that you know is unsecure, then you
+should verify that the second line of this message says `ED25519 key fingerprint
+is SHA256:Ww2boukhve4pYouM6N/I5Ri1dsVjd383DthYcmFAmsE.` or else wait until you
+are on the UW internet before running this command.)
+
+Upon connecting to Hyak, you will be prompted for your password; this is your
+standard UW password. When you have entered it correctly, you will be prompted
+for 2-factor authentication (2FA), just like when logging into any UW
+service. Once you have completed 2FA, you should see a message that starts with
+ascii art spelling out "klone hyak" and ends with a variety of information about
+the cluster. From this point until you **`exit`** Hyak or lose connection, any
+command you enter will go to Hyak instead of to your own computer.
 
 
 ## Configuring Hyak
