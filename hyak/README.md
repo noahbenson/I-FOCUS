@@ -120,13 +120,68 @@ ascii art spelling out "klone hyak" and ends with a variety of information about
 the cluster. From this point until you **`exit`** Hyak or lose connection, any
 command you enter will go to Hyak instead of to your own computer.
 
-
-## Configuring Hyak
-
-...
+(Official information about logging into Hyak can be found
+[here](https://hyak.uw.edu/docs/hyak101/basics/login/).)
 
 
-## Using `hyakvnc`
+## (4) Configuring Hyak
 
-...
+So far you have configured your computer to make it easy to connect to
+Hyak. However, Hyak also needs to be configured to make it easier to use. We
+will do this in several steps.
+
+Note that you only need to run these configuration steps once, no matter how
+many different computers you use to connect to Hyak, because they are
+configurations of Hyak itself and thus are independent of the computer used to
+connect to Hyak.
+
+### (4.1) Configure SSH on Hyak
+
+The first thing we need to do is to configure SSH on Hyak. We need to do this
+because we will use SSH not only to connect to Hyak itself but also to connect
+to individual compute nodes on Hyak. When we run the command `ssh hyak`, we make
+a connection to "klone," the so-called "head node" of the Hyak cluster. Because
+Hyak is a cluster of computers, a single computer (klone) is assigned as a sort
+of manager and user-interface point for the rest of the cluster. When we run
+anything substantive, we don't want to run it on this computer; we instead want
+to run it on one of the nodes (computers) that is powerful and optimized for
+computation. To connect to these nodes, we use SSH, and we want to set up SSH so
+that it doesn't require that we type a password each time we do this
+(unfortunately, we can't do this for connecting to klone itself).
+
+1. Make sure that the `.ssh` directory exists: **`mkdir -p ~/.ssh`**
+2. Generate a public-private key pair: **`ssh-keygen -C "<NetID>@uw.edu" -t ed25519`**  
+   This command will ask you a few questions; you may accept all of them as the
+   default without typing any additional information into the
+   prompts. Confusingly, one of the questions is for a password, which you
+   should leave blank. You don't want to type a password every time you use this
+   key to connect to another computer, and you don't need a password because you
+   are the only user with permission to read the file containing the private key
+   you are creating. If this command runs successfully it will end by printing
+   out a weird looking ascii art picture that represents your key.
+3. Authorize this key for connecting to compute nodes:
+   **`cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys`**  
+   This command puts a copy of your new public key at the end of the
+   `authorized_keys` file, allowing you to use it for logging into compute nodes
+   (the key will be used automatically once you have done this).
+   
+To test that the above steps were successful, you can run the following command:
+**`ssh n3441`**. If this command prints something like the following, you have
+configured SSH successfully:  
+```
+Warning: Permanently added 'n3441,10.64.66.185' (ECDSA) to the list of known hosts.
+Access denied by pam_slurm_adopt: you have no active jobs on this node
+Connection closed by 10.64.66.185 port 22
+```  
+If, on the other hand, the command asks you for a password, then something has
+gone wrong with your SSH configuration. (The first line of the above message may
+not be printed if you have run this command before.)
+
+### (4.2) 
+
+
+## (5) Using `hyakvnc`
+
+Currently, the `hyakvnc` client is usable but not very useful. This section will
+be updated once we have need of the `hyakvnc` tool.
 
