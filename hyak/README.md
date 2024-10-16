@@ -177,7 +177,38 @@ If, on the other hand, the command asks you for a password, then something has
 gone wrong with your SSH configuration. (The first line of the above message may
 not be printed if you have run this command before.)
 
-### (4.2) 
+### (4.2) Install `hyak-jupyter`
+
+The `hyak-jupyter` program allows one to easily use a Jupyter notebook over a
+Hyak connection. You can install this program by using the repository containing
+these instructions--it also contains the program itself and an installation
+script. To do this, you will need to clone the repository on Hyak then run the
+appropriate script.
+
+If you are unfamiliar with git and GitHub, then I recommend reviewing the
+[Software Carpentry lesson on Git and
+GitHub](https://swcarpentry.github.io/git-novice/). You do not need to go
+through all the steps for setting up Git and GitHub in order to follow these
+steps, however.
+
+1. I typically keep Git repositories in a subdirectory of my home directory
+   called `repos` or `code`. To create this directory, first make sure you are
+   in your home directory (command: **`cd`**) then: **`mkdir -p repos`**
+2. Navigate into this directory using the `cd` (_c_hange _d_irectory) command:
+   **`cd repos`**
+3. Clone the repository: **`git clone https://github.com/noahbenson/i-focus`**  
+   This will create a subdirectory of the `repos` directory named `i-focus` that
+   contains this repository.
+4. Navigate into the `i-focus` repository: **`cd i-focus`**
+5. Run the installation script: **`sh hyak/setup.sh`**
+
+The final command above should print a message stating that it was
+successful. Once this has been run, you can use the `hyak-jupyter` command to
+start a Jupyter instance (see below for more information).
+
+### (4.3) Using Jupyter on Hyak
+
+...
 
 
 ## (5) Using `hyakvnc`
