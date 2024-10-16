@@ -88,13 +88,13 @@ then the command that should actually be entered is **`echo nben@uw.edu`**.
    Host hyak
      HostName klone.hyak.uw.edu
      User <NetID>
-     LocalForward 7777 /mmfs1/home/<NetID>/.tunnels/singularity-jupyter/default.login.sock
+     LocalForward 7777 /mmfs1/home/<NetID>/.hyak-jupyter/tunnels/default/login.sock
    ```  
    Note that the two occurrences of `<NetID>` above need to be replaced with
    your NetID.  
    Once you have entered the text above, you can save the file by pressing
-   control+O (O for "write _o_utput") and pressing enter when it prompts you
-   to edit the filename then pressing control+X (X for "e_x_it"). There is a
+   control+O (O for "write output") and pressing enter when it prompts you
+   to edit the filename then pressing control+X (X for "exit"). There is a
    key of these keyboard commands at the bottom of the nano screen; the `^`
    symbol stands for control, so `^X` means control+X.
 
@@ -194,7 +194,7 @@ steps, however.
 1. I typically keep Git repositories in a subdirectory of my home directory
    called `repos` or `code`. To create this directory, first make sure you are
    in your home directory (command: **`cd`**) then: **`mkdir -p repos`**
-2. Navigate into this directory using the `cd` (_c_hange _d_irectory) command:
+2. Navigate into this directory using the `cd` (change directory) command:
    **`cd repos`**
 3. Clone the repository: **`git clone https://github.com/noahbenson/i-focus`**  
    This will create a subdirectory of the `repos` directory named `i-focus` that
