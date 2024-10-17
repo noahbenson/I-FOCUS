@@ -208,7 +208,22 @@ start a Jupyter instance (see below for more information).
 
 ### (4.3) Using Jupyter on Hyak
 
-...
+Once you have run the above setup instructions, you can start a Jupyter instance
+by running the following command:
+```bash
+hyak-jupyter -A <account> -p ckpt-all --mem=8G -N 1 --time=<time>
+```
+
+In the command, the `<account>` should be the name of your Hyak
+account and `<time>` should be the maximum amount of time you intend
+to use the node (it's okay to ask for more time than you expect to
+use, but if you have a good guess, then use that); for example, two
+hours would be `--time=2:00:00`. If you aren't sure of your account
+name, you can see all your accounts using the `groups` command. You
+can also request a different partition (my changin `-p ckpt-all`) or a
+different amount of memory (by changing `--mem=8G`). These options are
+documented in the `srun` command and additionally
+[here](https://hyak.uw.edu/docs/compute/scheduling-jobs/).
 
 
 ## (5) Using `hyakvnc`

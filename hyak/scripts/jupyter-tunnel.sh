@@ -9,8 +9,11 @@ function die {
 # Configuration should come from the environment variables.
 
 # Make sure our screen caption is correct.
-[ -n "$STY" ] && screen caption always \
-   "%{= RW}To detach, press control + a then d. To reattach: screen -x"
+[ -n "$STY" ] && {
+    echo "==========================================================="
+    echo "To detach, press control + a then d. To reattach: screen -x"
+    echo ""
+}
 
 # Wait for the file to appear...
 while :
