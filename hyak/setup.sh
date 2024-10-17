@@ -36,6 +36,7 @@ EOF
 fi
 
 cat <<EOF
+================================================================================
 Successfully installed hyak-jupyter!
 
 To run Jupyter on Hyak, just use the command hyak-jupyter; any options that can
@@ -54,6 +55,7 @@ Or by adding the following to your computer's ssh config file:
 If you have followed the instructions in the I-FOCUS github repository's README
 files, then you should have already added the relevant text to your ssh config
 file!
+
 EOF
 
 exit 0

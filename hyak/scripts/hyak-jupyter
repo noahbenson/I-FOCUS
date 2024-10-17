@@ -1,57 +1,97 @@
 #! /bin/bash
+################################################################################
+# Starts up a Jupyter instance on a Hyak node and sets up forwarding for it.
+# The Jupyter instance is run using an apptainer image, which may be specified
+# via options, and the command is run inside of a screen instance with the name
+# "jupyter" for convenience.
 
-# The one variable we set manually.
-BINDIR="${HOME}/.hyak-jupyter/bin"
 
-# If Jupyter is already running, just error our right away
-"${BINDIR}"/jupyter-query.sh "$@" && {
-    echo "Jupyter is already running:"
-    jupyter-query.sh print
-    exit 1
-}
+# Utilities ####################################################################
 
-# Utility stuff.
+# A function to print an error then exit with an error code.
 function die {
     echo "ERROR:" "$@" 1>&2
     exit 1
 }
 
-# Next, configuration--this gets pulled out of either environment
-# variables are command-line arguments by the args script:
-eval "$(${BINDIR}/hyak-jupyter-args.sh "$@")"
+
+# Configuration ################################################################
+
+# The directory containing the rest of the hyak-jupyter scripts. This can be
+# overloaded via the environment variable HYAK_JUPYTER_BIN.
+# The scripts in this directory are essentially "private" to the hyak-jupyter
+# program and aren't intended to be called directly.
+BINDIR="${HYAK_JUPYTER_BIN:-${HOME}/.hyak-jupyter/bin}"
+
+# It's easiest to just put the BINDIR on the PATH. POSIX requires that the PATH
+# is searched left-to-right, so putting BINDIR firsts ensures that our scripts
+# are always called (and not some other scripts on the PATH that accidentally
+# have the same name).
+PATH="${BINDIR}:${PATH}"
+
+# The rest of the configuration can be loaded using the jupyter-config.sh script
+# in the BINDIR.
+eval "$(jupyter-config.sh "$@")"
+
+
+# Sanity Checking ##############################################################
+
+# If Jupyter is already running, just error out right away.
+jupyter-query.sh "$@" && {
+    echo "Jupyter is already running:"
+    jupyter-query.sh print
+    exit 1
+}
 
 # Make sure we can create a tunnel directory.
-mkdir -p "${TUNNEL_DIR}" \
-    || die "Could not make tunnel directory: ${TUNNEL_DIR}"
+mkdir -p "${HYAK_JUPYTER_TUNNEL_DIR}" \
+    || die "Could not make tunnel directory: ${HYAK_JUPYTER_TUNNEL_DIR}"
 
 # If a previous run's scripts and such are still present, clear them out.
-[ -e "${SOCKET_FILE}" ] && rm "${SOCKET_FILE}"
-[ -e "${LOGIN_FILE}" ]  && rm "${LOGIN_FILE}"
-[ -e "${JOB_FILE}" ]    && rm "${JOB_FILE}"
-[ -e "${RUN_SCRIPT}" ]  && rm "${RUN_SCRIPT}"
+[ -e "${HYAK_JUPYTER_SOCKET_FILE}" ] && rm "${HYAK_JUPYTER_SOCKET_FILE}"
+[ -e "${HYAK_JUPYTER_LOGIN_FILE}" ]  && rm "${HYAK_JUPYTER_LOGIN_FILE}"
+[ -e "${HYAK_JUPYTER_JOB_FILE}" ]    && rm "${HYAK_JUPYTER_JOB_FILE}"
+[ -e "${HYAK_JUPYTER_RUN_SCRIPT}" ]  && rm "${HYAK_JUPYTER_RUN_SCRIPT}"
 
 # At this point, if we are not in a screen, put us in one.
-if [ -z "$STY" ]
-then exec screen -S jupyter /bin/bash "$0" "$@"
-else echo "==========================================================="
-     echo "To detach, press control + a then d. To reattach: screen -x"
-     echo ""
-     screen -S jupyter -X screen "${BINDIR}/jupyter-tunnel.sh"
-     screen -S jupyter -X caption always \
-	    "%{= RW}To detach, press control + a then d. To reattach: screen -x jupyter"
-     screen -S jupyter -X prev
-fi
+[ -z "$STY" ] \
+    && exec screen -S "${HYAK_JUPYTER_SCREEN_NAME}" /bin/bash "$0" "$@"
+
+# Configure the screen that we are in.
+screen -S "${HYAK_JUPYTER_SCREEN_NAME}" -X screen \
+   "${BINDIR}/jupyter-tunnel.sh" "$@"
+screen -S "${HYAK_JUPYTER_SCREEN_NAME}" -X caption always \
+   "%{= RW}To detach, press control + a then d. To reattach: screen -x ${HYAK_JUPYTER_SCREEN_NAME}"
+screen -S "${HYAK_JUPYTER_SCREEN_NAME}" -X prev
 
 # Everything checks out; we can export our environment and run it now.
-echo "Starting Jupyter using ${SOCKET_NAME} socket."
+echo "Starting Jupyter using the tag ${HYAK_JUPYTER_TAG}..."
+echo ""
+echo "This may take a few minutes, especially if you have not used the image"
+echo "${HYAK_JUPYTER_IMAGE} recently."
 
-echo "Queuing job: ${JUPYTER_START_CMD}"
+# We need to export the important parts of the environment now.
+eval "$(
+   set | grep '^(HYAK_JUPYTER_)|(SLURM_)' | sed 's/^/export /g')"
 export JOBOUT="${TUNNEL_DIR}/startup.out"
 export JOBERR="${TUNNEL_DIR}/startup.err"
-srun "${OTHER_ARGS[@]}" --pty /bin/bash "${JUPYTER_START_CMD}" "${SOCKET_NAME}"
-echo "Jupyter exited with status $?."
 
-# Cleanup:
-[ -e "${SOCKET_FILE}" ] && rm "${SOCKET_FILE}"
+# Run the job.
+srun --account="${SLURM_ACCOUNT}" \
+     --partition="${SLURM_PARTITION}" \
+     --mem="${SLURM_MEM_PER_NODE}" \
+     -N "${SLURM_NNODES}" \
+     --ntasks-per-node="${SLURM_NTASKS_PER_NODE}" \
+     --pty \
+     "${SRUN_ARGS[@]}" \
+     -- \
+     /bin/bash "${BINDIR}/jupyter-start.sh" "$@"
+SRUN_RVAL="$?"
 
+# Clean up and exit.
+echo ""
+echo "Jupyter exited with status ${SRUN_RVAL}."
+[ -e "${HYAK_JUPYTER_SOCKET_FILE}" ] && rm "${HYAK_JUPYTER_SOCKET_FILE}"
+echo ""
 read -n1 -p "Press enter to exit." KEYPRESS
+exit ${SRUN_RVAL}
