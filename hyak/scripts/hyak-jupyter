@@ -32,11 +32,14 @@ mkdir -p "${TUNNEL_DIR}" \
 
 # At this point, if we are not in a screen, put us in one.
 if [ -z "$STY" ]
-then exec screen /bin/bash "$0" "$@"
+then exec screen -S jupyter /bin/bash "$0" "$@"
 else echo "==========================================================="
      echo "To detach, press control + a then d. To reattach: screen -x"
      echo ""
-     screen screen "${BINDIR}/jupyter-tunnel.sh"
+     screen -S jupyter -X screen "${BINDIR}/jupyter-tunnel.sh"
+     screen -S jupyter -X caption always \
+	    "%{= RW}To detach, press control + a then d. To reattach: screen -x jupyter"
+     screen -S jupyter -X prev
 fi
 
 # Everything checks out; we can export our environment and run it now.
