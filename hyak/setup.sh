@@ -18,7 +18,7 @@ mkdir -p "${BINDIR}" \
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # First thing is to copy all the executables into the bin directory:
-cp "${SCRIPT_DIR}/scripts/*.sh" "${BINDIR}" \
+cp "${SCRIPT_DIR}"/scripts/*.sh "${BINDIR}" \
     || die "Could not copy helper scripts to ${BINDIR}"
 # Also put the hyak-jupyter script in the ~/.local/bin directory:
 mkdir -p "${HOME}/.local/bin" \
@@ -43,7 +43,7 @@ be passed to the srun command can be passed to hyak-jupyter as well.
 
 In order for this command to work, you must log in to Hyak with local port
 forwarding from 7777 to file:
-   /mmfs1/home/${USER}/.tunnels/singularity-jupyter/default.login.sock
+   ${BASEDIR}/tunnels/default/login.sock
 This may be done by running ssh with the following option:
    ssh -L7777:${BASEDIR}/tunnels/default/login.sock ${USER}@klone.hyak.uw.edu
 Or by adding the following to your computer's ssh config file:

@@ -4,9 +4,12 @@
 # prints those variables out; it is meant to be run as:
 # eval "$(hyak-jupyter-args.sh $@)"
 
+# The one variable we set manually.
+BINDIR="${HOME}/.hyak-jupyter/bin"
+
 # Default values:
 IMAGE="${IMAGE:-docker://quay.io/jupyter/datascience-notebook:2024-10-02}"
-JUPYTER_START_CMD="${JUPYTER_START_CMD:-${HOME}/bin/worker/jupyter-start.sh}"
+JUPYTER_START_CMD="${JUPYTER_START_CMD:-${BINDIR}/jupyter-start.sh}"
 TUNNELS_DIR="${TUNNELS_DIR:-${HOME}/.hyak-jupyter/tunnels}"
 JUPYTER_ENABLE_LAB="${JUPYTER_ENABLE_LAB:-yes}"
 SOCKET_NAME="${SOCKET_NAME:-default}"
@@ -60,6 +63,7 @@ echo "export TUNNELS_DIR=${TUNNELS_DIR}"
 echo "export TUNNEL_NAME=${TUNNEL_NAME}"
 echo "export TUNNEL_DIR=${TUNNEL_DIR}"
 echo "export JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB}"
+echo "export SOCKET_NAME=${SOCKET_NAME}"
 echo "export SOCKET_FILE=${SOCKET_FILE}"
 echo "export LOGIN_FILE=${LOGIN_FILE}"
 echo "export JOB_FILE=${JOB_FILE}"

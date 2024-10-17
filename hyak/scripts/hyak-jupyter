@@ -36,7 +36,7 @@ then exec screen /bin/bash "$0" "$@"
 else echo "==========================================================="
      echo "To detach, press control + a then d. To reattach: screen -x"
      echo ""
-     screen screen jupyter-tunnel.sh
+     screen screen "${BINDIR}/jupyter-tunnel.sh"
 fi
 
 # Everything checks out; we can export our environment and run it now.

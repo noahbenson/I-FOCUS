@@ -52,7 +52,11 @@ while :
 do [ -e "${SOCKET_FILE}" ] && break
    sleep 2
 done
+echo ""
 echo "Tunnel connected."
+echo ""
+echo "--------------------------------------------------------------------------------"
+echo "To connect to Jupyter, point your browser to localhost:7777"
 
 while :
 do if ! [ -e "${SOCKET_FILE}" ]

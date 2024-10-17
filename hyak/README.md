@@ -225,6 +225,16 @@ different amount of memory (by changing `--mem=8G`). These options are
 documented in the `srun` command and additionally
 [here](https://hyak.uw.edu/docs/compute/scheduling-jobs/).
 
+Once you've run this command, a screen session will open. It may take awhile for
+the jupyter session to be ready, especially if it is the first time you have run
+it or if you haven't run it in awhile. Once it is ready, a line will appear
+that says:  
+```
+To connect to Jupyter, point your browser to localhost:7777
+```  
+At this point, if you go to `localhost:7777` you should automatically connect to
+the Jupyter server on Hyak.
+
 
 ## (5) Using `hyakvnc`
 
