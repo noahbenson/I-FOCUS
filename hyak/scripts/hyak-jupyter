@@ -75,8 +75,8 @@ then echo "Additional Arguments:"
      echo "   ${SRUN_ARGS[@]}"
      echo ""
 fi
-echo "This may take a few minutes, especially if you have not used the image"
-echo "${HYAK_JUPYTER_IMAGE} recently."
+echo "This may take a few minutes, depending on the system usage right now and"
+echo "how many resources you have requested for this session."
 
 # We need to export the important parts of the environment now.
 eval "$(

@@ -66,6 +66,9 @@ chmod 700 "${HYAK_JUPYTER_RUN_SCRIPT}"
 # Wait for the socket file to appear...
 echo "Waiting for tunnel to connect..."
 echo ""
+echo "This may take a few minutes, especially if you have not used the image"
+echo "${HYAK_JUPYTER_IMAGE} recently."
+echo ""
 echo "To check on the tunnel progress, press control + a twice; you can do this"
 echo "again to switch back."
 while :
