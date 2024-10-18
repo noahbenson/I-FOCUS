@@ -211,18 +211,22 @@ start a Jupyter instance (see below for more information).
 Once you have run the above setup instructions, you can start a Jupyter instance
 by running the following command:
 ```bash
-hyak-jupyter -A <account> -p ckpt-all --mem=8G -N 1 --time=<time>
+hyak-jupyter --time=<time>
 ```
 
-In the command, the `<account>` should be the name of your Hyak
-account and `<time>` should be the maximum amount of time you intend
-to use the node (it's okay to ask for more time than you expect to
-use, but if you have a good guess, then use that); for example, two
-hours would be `--time=2:00:00`. If you aren't sure of your account
-name, you can see all your accounts using the `groups` command. You
-can also request a different partition (my changin `-p ckpt-all`) or a
-different amount of memory (by changing `--mem=8G`). These options are
-documented in the `srun` command and additionally
+In the command, the `<time>` should be the maximum amount of time you intend to
+use the node (it's okay to ask for more time than you expect to use, but if you
+have a good guess, then use that); for example, two hours would be
+`--time=2:00:00`. You can also provide any argument that is typically provided
+to the `srun` or `sbatch` commands; for example, you can request that the
+allocation occur under a specific Hyak account with the option `-A
+<account>`. (If you aren't sure of your account name, you can see all your
+accounts using the `groups` command; `hyak-jupyter` will automatically pick one
+for you if you don't provide it.) Fairly common options that you might want to
+use includ requesting a different partition (via `-p <partition>`, such as `-p
+ckpt-all`), a different amount of memory (via, e.g., `--mem=8G`), or a different
+number of CPUs (e.g., `--ntasks-per-node=4`). These options are documented in
+the `srun` command and additionally
 [here](https://hyak.uw.edu/docs/compute/scheduling-jobs/).
 
 Once you've run this command, a screen session will open. It may take awhile for
@@ -234,6 +238,17 @@ To connect to Jupyter, point your browser to localhost:7777
 ```  
 At this point, if you go to `localhost:7777` you should automatically connect to
 the Jupyter server on Hyak.
+
+Note that once you have started `hyak-jupyter`, it will run in a [GNU
+screen](https://www.gnu.org/software/screen/manual/screen.html), which allows it
+to continue to run when you are no longer connected to Hyak. You can detach the
+screen (i.e., put the program in the background such that it is still running
+but does not take up your terminal) by pressing control+a then d. To reattach
+it, you can type `screen -x jupyter`. These instructions are also at the bottom
+of the screen window. If you close your connection to Hyak itself, you will lose
+connection to the Jupyter instance, but it will continue running for as much
+time as you requested, so long-running jobs can be started in Jupyter then left
+on Hyak in this way.
 
 
 ## (5) Using `hyakvnc`
