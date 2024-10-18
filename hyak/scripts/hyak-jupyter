@@ -68,7 +68,7 @@ screen -S "${HYAK_JUPYTER_SCREEN_NAME}" -X prev
 echo "Starting Jupyter using the tag ${HYAK_JUPYTER_TAG}..."
 echo ""
 echo "SLURM Configuration:"
-set | grep '^SLURM' | grep -v '_DEFAULT$' | sed -E 's/^/   - /g'
+set | grep '^SLURM' | grep -v '_DEFAULT=' | sed -E 's/^/   - /g'
 echo ""
 if [ -n "${SRUN_ARGS[@]}" ]
 then echo "Additional Arguments:"
