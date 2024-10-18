@@ -67,6 +67,14 @@ screen -S "${HYAK_JUPYTER_SCREEN_NAME}" -X prev
 # Everything checks out; we can export our environment and run it now.
 echo "Starting Jupyter using the tag ${HYAK_JUPYTER_TAG}..."
 echo ""
+echo "SLURM Configuration:"
+set | grep '^SLURM' | sed -E 's/^/   - /g'
+echo ""
+if [ -n "${SRUN_ARGS[@]}" ]
+then echo "Additional Arguments:"
+     echo "   ${SRUN_ARGS[@]}"
+     echo ""
+fi
 echo "This may take a few minutes, especially if you have not used the image"
 echo "${HYAK_JUPYTER_IMAGE} recently."
 
