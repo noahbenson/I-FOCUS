@@ -79,7 +79,7 @@ echo "${IFOCUS_INIT}" \
 
 # Next, we can grab the most of the variables we need from the set command:
 set | grep "^IFOCUS_JUPYTER_" \
-    | grep -v "^IFOCUS_[^=]*_DEFAULT=" \
+    | grep -vE "^IFOCUS_[^=]*_DEFAULT=" \
     | sed "s/^IFOCUS_/export IFOCUS_/g"
 
 # Last, export the (possibly modified) POS_ARGS and IFOCUS_IMAGE variables.
