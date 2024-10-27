@@ -58,10 +58,6 @@ function die { echo "ERROR: \$*" 1>&2; exit 1; }
 # Start by sourcing the job file:
 source "${IFOCUS_JOB_FILE}"
 
-# This script only gets run if the socket file exists (i.e., it must be run from
-# the tunnel script that creates the socket file).
-[ -w "${IFOCUS_JUPYTER_SOCKET_FILE}" ] \
-    || die "Socket not found or not writeable: ${IFOCUS_JUPYTER_SOCKET_FILE}"
 # We want to automatically delete the socket file when this script exits, so we
 # set up a function and trap for this to happen:
 function ifocus_socket_cleanup {

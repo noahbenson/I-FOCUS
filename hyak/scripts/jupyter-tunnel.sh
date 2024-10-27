@@ -29,6 +29,12 @@ cd
 # Establish the Tunnel #########################################################
 
 # Wait for the run script to appear...
+echo "Waiting for startup script to initialize..."
+echo ""
+echo "This may take a few moments; to see the startup script's progress, press"
+echo "control + a twice. You can press control + a twice again to toggle back"
+echo "to this view."
+echo ""
 while :
 do if [ -e "${IFOCUS_JUPYTER_RUN_SCRIPT}" ]
    then break
@@ -38,7 +44,6 @@ done
 # At this point, we source the job file again, because it is now guaranteed to
 # have a slurm nodename included in it:
 source "${IFOCUS_JOB_FILE}"
-cat "${IFOCUS_JOB_FILE}"
 
 # Run the script on the node...
 echo ssh -L "${IFOCUS_JUPYTER_LOGIN_FILE}:${IFOCUS_JUPYTER_SOCKET_FILE}" \
