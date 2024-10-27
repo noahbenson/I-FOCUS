@@ -35,6 +35,9 @@ do if [ -e "${IFOCUS_JUPYTER_RUN_SCRIPT}" ]
    else sleep 2
    fi
 done
+# At this point, we source the job file again, because it is now guaranteed to
+# have a slurm nodename included in it:
+source "${IFOCUS_JOB_FILE}"
 
 # Run the script on the node...
 ssh -L "${IFOCUS_JUPYTER_LOGIN_FILE}:${IFOCUS_JUPYTER_SOCKET_FILE}" \
