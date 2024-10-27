@@ -44,10 +44,22 @@ query=$(jupyter-query.sh "$@") && {
     echo "Jupyter is already running with SLURM job id ${SLURM_JOB_ID}"
     echo "on screen ${IFOCUS_SCREEN}."
     echo ""
-    read -n1 -p "Reattach this screen ([y]/n)? " REATTACH_SCREEN
-    if [ "${REATTACH_SCREEN}" = "n" ] || [ "${REATTACH_SCREEN}" = "N" ]
-    then exit 1
-    else exec screen -x "${IFOCUS_SCREEN}"
+    echo ""
+    read -p "Kill this job and restart Jupyter (y/[n])? " RESTART_SCREEN
+    if [ "${RESTART_SCREEN}" = "y" ] || [ "${RESTART_SCREEN}" = "Y" ]
+    then scancel "${SLURM_JOB_ID}"
+         ii=0
+         while ifocus_running && [ $ii -lt 10 ]
+         do sleep 2; ii=$(( $ii + 1 ))
+         done
+         [ -w "${IFOCUS_STATUS_FILE}" ] && {
+             echo "WARNING:" 1>&2
+             echo "  `scancel ${SLURM_JOB_ID}` did not clear status." 1>&2
+             echo "  Manually deleting status file instead: " 1>&2
+             echo "    ${IFOCUS_STATUS_FILE}" 1>&2
+             rm -f "${IFOCUS_STATUS_FILE}"
+         }
+    else exit 1
     fi
 }
 
@@ -78,7 +90,11 @@ then # Before we start the screen, make sure there isn't already one running:
      exec screen -S "${IFOCUS_SCREEN}" /bin/bash "$0" "$@"
 fi
 
-# Everything checks out; we can export our environment and run it now.
+# Everything checks out. At this point it's safe to claim that the hyak-jupyter
+# I-FOCUS job is running.
+ifocus_start
+
+# We can export our environment and run it now.
 echo "Starting Jupyter using the tag ${IFOCUS_SCREEN}..."
 echo ""
 echo "I-FOCUS Configuration:"
@@ -114,7 +130,7 @@ set | grep "^${IFOCUS_SLURM_PREFIX}" \
    >> "${IFOCUS_JOB_FILE}"
 echo "export SLURM_ARGS=(${SLURM_ARGS[@]@Q})" >> "${IFOCUS_JOB_FILE}"
 echo "export POS_ARGS=(${POS_ARGS[@]@Q})" >> "${IFOCUS_JOB_FILE}"
-declare -f ifocus_status_open >> "${IFOCUS_JOB_FILE}"
+declare -f ifocus_start ifocus_isrunning >> "${IFOCUS_JOB_FILE}"
 
 # We also want to make sure that there is no run script (it shouldn't be written
 # until the node has been allocated). Same with the socket files.

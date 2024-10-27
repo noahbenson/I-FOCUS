@@ -256,13 +256,24 @@ fi
     || mkdir -p "${IFOCUS_WORK_PATH}" \
     || die "Could not make work directory: ${IFOCUS_WORK_PATH}"
 
-# We can now write a function for opening the status file.
-function ifocus_status_open {
+# We can now write a function for opening and editing the status file. This file
+# should be created as soon as a job starts initializing; once it finishes, the
+# status file should be automatically deleted.
+# Any script that runs ifocus_start will immediately create the status file and
+# and will automatically delete the status file on exit.
+function ifocus_start {
     touch "${IFOCUS_STATUS_FILE}"
-    function ifocus_status_close {
+    function ifocus_status_cleanup {
         [ -w "${IFOCUS_STATUS_FILE}" ] && rm -f "${IFOCUS_STATUS_FILE}"
     }
-    trap ifocus_status_close EXIT SIGINT SIGTERM SIGQUIT SIGILL SIGABRT
+    trap ifocus_status_cleanup EXIT SIGINT SIGTERM SIGQUIT SIGILL SIGABRT
+}
+# ifocus_isrunning && echo "ifocus job is already running!"
+function ifocus_isrunning {
+    if [ -r "${IFOCUS_STATUS_FILE}" ]
+    then return 0
+    else return 1
+    fi
 }
 
 
@@ -282,7 +293,7 @@ set | grep "^SLURM_" \
     | grep -vE '^SLURM_[^=]*_DEFAULT=' \
     | sed "s/^SLURM_/export ${IFOCUS_SLURM_PREFIX}/g"
 # We also want to export our function:
-declare -f ifocus_status_open
+declare -f ifocus_start ifocus_isrunning
 
 # We want to export SLURM_ARGS, and we want that variable name to be SLURM_ARGS
 # whether the ifocus slurm prefix is SALLOC_ or SLURM_

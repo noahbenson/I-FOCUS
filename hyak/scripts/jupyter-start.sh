@@ -34,12 +34,13 @@ cd
 mkdir -p "${IFOCUS_WORK_PATH}" \
     || die "Could not make work directory: ${IFOCUS_WORK_PATH}"
 
+# It's now safe to grab the status; this is also done by the hyak-jupyter script
+# because we want the status file to disappear as soon as there is a failure in
+# the scripts.
+ifocus_start
+
 # Write the nodename out to the job data file:
 echo "export SLURMD_NODENAME=${SLURMD_NODENAME}" >> "${IFOCUS_JOB_FILE}"
-
-# Go ahead and claim the status (this will automatically set up a callback for
-# when the script exits or aborts to delete the status file.
-ifocus_status_open
 
 # Write out the command for the server:
 if [ "${IFOCUS_JUPYTER_CMD}" = "lab" ]
@@ -58,20 +59,17 @@ function die { echo "ERROR: \$*" 1>&2; exit 1; }
 # Start by sourcing the job file:
 source "${IFOCUS_JOB_FILE}"
 
-# We want to automatically delete the socket file when this script exits, so we
-# set up a function and trap for this to happen:
-function ifocus_socket_cleanup {
-    if [ -w "${IFOCUS_JUPYTER_SOCKET_FILE}" ]
-    then rm -f "${IFOCUS_JUPYTER_SOCKET_FILE}"
-    fi
-}
-trap ifocus_socket_cleanup EXIT SIGINT SIGTERM SIGQUIT SIGILL SIGABRT
+# We claim the status file here; this file is also claimed by other scripts that
+# lead to this script getting called, but these are layers of failure checks, so
+# there's no issue. We want the status file to disappear as soon as the system
+# fails, so we put the check everywhere.
+ifocus_start
 
 singularity exec \
     --env "JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB}" \
     --home "${HOME}" \
     --bind "${HOME}/.local:/home/jovyan/.local" \
-    --bind "/gscratch:/home/jovyan/gscratch" \
+    --bind "/gscratch:/gscratch" \
     ${IFOCUS_IMAGE} \
     jupyter ${IFOCUS_JUPYTER_CMD} \
        --no-browser \
@@ -104,5 +102,5 @@ echo "-------------------------------------------------------------------------"
 echo "To connect to Jupyter, point your browser to localhost:7777"
 
 # Now wait for the tunnel to exit before exiting ourselves.
-while [ -e "${IFOCUS_JUPYTER_SOCKET_FILE}" ]; do sleep 5; done
+while ifocus_isrunning; do sleep 5; done
 exit 0

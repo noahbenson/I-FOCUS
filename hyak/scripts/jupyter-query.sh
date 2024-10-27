@@ -9,20 +9,21 @@
 
 # What directory is this script in?
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-# Load the configuration from the script for it.
-eval "$(${SCRIPT_DIR}/jupyter-config.sh "$@")"
+
+# Initialize the Jupyter data from the script directory.
+eval "$(${SCRIPT_DIR}/jupyter-init.sh "$@")"
 
 
 # Check the Job Directory ######################################################
 
-# First, read in the job data.
-[ -r "${HYAK_JUPYTER_JOB_FILE}" ] || exit 1
-source "${HYAK_JUPYTER_JOB_FILE}"
+# First, if there is no status file, then no Jupyter job is running.
+ifocus_isrunning || exit 1
 
-# If the socket file isn't there, the job is over.
-[ -r "${HYAK_JUPYTER_SOCKET_FILE}" ] || exit 1
-
-# Make sure this is still our job by checking squeue.
+# Make sure this is still our job by reading in the job info then
+# checking squeue for the job ID.
+[ -r "${IFOCUS_JOB_FILE}" ] || exit 1
+source "${IFOCUS_JOB_FILE}"
+[ -n "${SLURM_JOB_ID}" ] || exit 1
 LNS=$(squeue -j "${SLURM_JOB_ID}" -u "${USER}" 2>/dev/null | wc -l)
 [ "$LNS" -eq 2 ] || exit 1
 
