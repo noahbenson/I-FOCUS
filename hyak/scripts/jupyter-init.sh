@@ -73,7 +73,7 @@ IFOCUS_JUPYTER_LOGIN_FILE="${IFOCUS_WORK_PATH}/login.sock"
 # First, we export the IFOCUS configuration; we exclude the POS_ARGS and the
 # IFOCUS_IMAGE variables because we may have modified them.
 echo "${IFOCUS_INIT}" \
-    | grep -v '^export POS_ARGS='
+    | grep -v '^export POS_ARGS=' \
     | grep -v '^export IFOCUS_IMAGE='
 
 # Next, we can grab the most of the variables we need from the set command:

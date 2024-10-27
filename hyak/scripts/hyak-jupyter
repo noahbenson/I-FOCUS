@@ -50,8 +50,8 @@ query=$(jupyter-query.sh "$@") && {
 if [ -z "$STY" ]
 then # Before we start the screen, make sure there isn't already one running:
      SCREENS=(
-         $(screen -list
-           | tr "\t" " " | grep -E '^ +[^ ]+'
+         $(screen -list \
+           | tr "\t" " " | grep -E '^ +[^ ]+' \
            | sed -E "s/^ +([0-9]+)\.([^ ]+) .*$/\1 '\2'/g"))
      ii=0
      while [ $ii -lt ${#SCREENS[@]} ]
