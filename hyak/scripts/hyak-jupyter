@@ -41,9 +41,14 @@ eval "$(jupyter-init.sh "$@")"
 # If Jupyter is already running, just error out right away.
 query=$(jupyter-query.sh "$@") && {
     eval "${query}"
-    echo -n "Jupyter is already running with SLURM job id ${SLURM_JOB_ID}"
-    echo    " on screen ${IFOCUS_SCREEN}."
-    exit 1
+    echo "Jupyter is already running with SLURM job id ${SLURM_JOB_ID}"
+    echo "on screen ${IFOCUS_SCREEN}."
+    echo ""
+    read -n1 -p "Reattach this screen ([y]/n)? " REATTACH_SCREEN
+    if [ "${REATTACH_SCREEN}" = "n" ] || [ "${REATTACH_SCREEN}" = "N" ]
+    then exit 1
+    else exec screen -x "${IFOCUS_SCREEN}"
+    fi
 }
 
 # At this point, if we are not in a screen, put us in one.
@@ -62,7 +67,7 @@ then # Before we start the screen, make sure there isn't already one running:
         if [ ${SNAME} = ${IFOCUS_SCREEN} ]
         then echo "A screen with the name '${SNAME}' (PID ${SPID}) is already"
              echo "running, but its ifocus-jupter process appears to be dead."
-             read -p "Kill this screen ([y]/n)? " KILLSCREEN
+             read -n1 -p "Kill this screen ([y]/n)? " KILLSCREEN
              if [ "${KILLSCREEN}" = "y" ] || [ "${KILLSCREEN}" = "yes" ]
              then screen -S "${SPID}.${SNAME}" -X quit &>/dev/null
              fi
