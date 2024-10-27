@@ -273,13 +273,13 @@ function ifocus_status_open {
 # We can grab most of the variables we need from the set command:
 set | grep "^IFOCUS_" \
     | grep -v '=$' \
-    | grep -v '^IFOCUS_[^=]_DEFAULT=' \
+    | grep -vE '^IFOCUS_[^=]_DEFAULT=' \
     | sed "s/^IFOCUS_/export IFOCUS_/g"
 # For the SLURM_ variables, we might need to convert them to SALLOC_ or some
 # other prefix.
 set | grep "^SLURM_" \
     | grep -v '=$' \
-    | grep -v '^SLURM_[^=]*_DEFAULT=' \
+    | grep -vE '^SLURM_[^=]*_DEFAULT=' \
     | sed "s/^SLURM_/export ${IFOCUS_SLURM_PREFIX}/g"
 # We also want to export our function:
 declare -f ifocus_status_open
@@ -290,7 +290,7 @@ SLURM_ALLARGS=(
     --account="${SLURM_ACCOUNT}"
     --partition="${SLURM_PARTITION}"
     --mem="${SLURM_MEM_PER_NODE}"
-    --nodes="${SLURM_NNODES"
+    --nodes="${SLURM_NNODES}"
     --ntasks="${SLURM_NTASKS}"
     --ntasks-per-node="${SLURM_NTASKS_PER_NODE}"
     --cpus-per-task="${SLURM_CPUS_PER_TASK}")
