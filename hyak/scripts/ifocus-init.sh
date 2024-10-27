@@ -273,7 +273,7 @@ function ifocus_status_open {
 # We can grab most of the variables we need from the set command:
 set | grep "^IFOCUS_" \
     | grep -v '=$' \
-    | grep -vE '^IFOCUS_[^=]_DEFAULT=' \
+    | grep -vE '^IFOCUS_[^=]*_DEFAULT=' \
     | sed "s/^IFOCUS_/export IFOCUS_/g"
 # For the SLURM_ variables, we might need to convert them to SALLOC_ or some
 # other prefix.
