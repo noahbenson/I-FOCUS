@@ -299,11 +299,11 @@ SLURM_ARGS=()
 for ARG in "${SLURM_ALLARGS[@]}"
 do [ "${ARG: -1}" != "=" ] && SLURM_ARGS+=("${ARG}")
 done
-# Print these as part of the configuration.
-echo "export SLURM_ARGS=(${SLURM_ARGS[@]@Q})"
-
-# The only thing left is the POS_ARGS list.
-echo "export POS_ARGS=(${POS_ARGS[@]@Q})"
+# Print these as part of the configuration, along with the POS_ARGS list.
+cat <<EOF
+export SLURM_ARGS=(${SLURM_ARGS[@]@Q})
+export POS_ARGS=(${POS_ARGS[@]@Q})
+EOF
 
 
 # Exit Cleanly! ################################################################
