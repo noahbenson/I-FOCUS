@@ -76,8 +76,6 @@ then # Before we start the screen, make sure there isn't already one running:
      SNAMES=($(screen -list | tr "\t" " " | grep -E '^ +[^ ]+' \
                             | sed -E "s/^ +([0-9]+)\.([^ ]+) .*$/\2/g"))
      ii=0
-     echo "Screens: ${SCREENS[@]@Q}"
-     read -p "..." TMPNONSENSE
      while [ $ii -lt ${#SNAMES[@]} ]
      do SPID=${SPIDS[$ii]}
         SNAME=${SNAMES[$ii]}
