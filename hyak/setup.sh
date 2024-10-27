@@ -25,8 +25,9 @@ mkdir -p "${HOME}/.local/bin" \
     || die "Could not create directory ${HOME}/.local/bin"
 cp "${SCRIPT_DIR}/scripts/hyak-jupyter" "${HOME}/.local/bin" \
     || die "Could not copy hyak-jupyter to directory ${HOME}/.local/bin"
-cp "${SCRIPT_DIR}/scripts/hyak-matlab" "${HOME}/.local/bin" \
-    || die "Could not copy hyak-matlab to directory ${HOME}/.local/bin"
+[ -x "${SCRIPT_DIR}/scripts/hyak-matlab" ] \
+    && cp "${SCRIPT_DIR}/scripts/hyak-matlab" "${HOME}/.local/bin" #\
+    #|| die "Could not copy hyak-matlab to directory ${HOME}/.local/bin"
 
 # Finally, we want to put a line for APPTAINER in the bashrc file:
 if ! grep -q APPTAINER_CACHE "${HOME}/.bashrc"
