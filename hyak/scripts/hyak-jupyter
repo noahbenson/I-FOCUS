@@ -53,7 +53,7 @@ query=$(jupyter-query.sh "$@") && {
     scancel "${SLURM_JOB_ID}"
     screen -S "${IFOCUS_SCREEN}" -X quit &>/dev/null
     ii=0
-    while ifocus_running && [ $ii -lt 5 ]
+    while ifocus_isrunning && [ $ii -lt 5 ]
     do sleep 2; ii=$(( $ii + 1 ))
     done
     if [ -w "${IFOCUS_STATUS_FILE}" ]
