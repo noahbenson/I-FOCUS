@@ -71,17 +71,16 @@ query=$(jupyter-query.sh "$@") && {
 # At this point, if we are not in a screen, put us in one.
 if [ -z "$STY" ]
 then # Before we start the screen, make sure there isn't already one running:
-     SCREENS=(
-         $(screen -list \
-           | tr "\t" " " | grep -E '^ +[^ ]+' \
-           | sed -E "s/^ +([0-9]+)\.([^ ]+) .*$/\1 '\2'/g"))
+     SPIDS=( $(screen -list | tr "\t" " " | grep -E '^ +[^ ]+' \
+                            | sed -E "s/^ +([0-9]+)\.([^ ]+) .*$/\1/g"))
+     SNAMES=($(screen -list | tr "\t" " " | grep -E '^ +[^ ]+' \
+                            | sed -E "s/^ +([0-9]+)\.([^ ]+) .*$/\2/g"))
      ii=0
      echo "Screens: ${SCREENS[@]@Q}"
      read -p "..." TMPNONSENSE
-     while [ $ii -lt ${#SCREENS[@]} ]
-     do SPID=${SCREENS[$ii]}
-        ii=$(( ${ii} + 1 ))
-        SNAME=${SCREENS[$ii]}
+     while [ $ii -lt ${#SNAMES[@]} ]
+     do SPID=${SPIDS[$ii]}
+        SNAME=${SNAMES[$ii]}
         ii=$(( ${ii} + 1 ))
         if [ ${SNAME} = ${IFOCUS_SCREEN} ]
         then echo "A screen with the name '${SNAME}' (PID ${SPID}) is already"
