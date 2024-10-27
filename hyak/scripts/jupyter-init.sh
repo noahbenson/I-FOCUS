@@ -39,8 +39,10 @@ IFOCUS_JUPYTER_CMD="${IFOCUS_JUPYTER_CMD:-${IFOCUS_JUPYTER_CMD_DEFAULT}}"
 # SLURM_NNODES should always be 1.
 NNODES_NAME="${IFOCUS_SLURM_PREFIX}NNODES"
 NNODES="${!NNODES_NAME}"
-[ "${NNODES}" -eq 1 ] \
-    || die "Jupyter uses 1 node, but ${NNODES_NAME}=${NNODES}"
+if [ -n "${NNODES}" ]
+then [ "${NNODES}" -eq 1 ] \
+         || die "Jupyter uses 1 node, but ${NNODES_NAME}=${NNODES}"
+fi
 
 # We want to search the arguments for --lab / --notebook.
 POS_ARGS_ORIG=("${POS_ARGS[@]}")
