@@ -247,7 +247,7 @@ fi
 
 # We may need to auto-detect the the account.
 if [ -z "${SLURM_ACCOUNT}" ]
-then SLURM_ACCOUNT="$("${IFOCUS_BIN_PATH}"/guess-account.sh)" \
+then SLURM_ACCOUNT="$("${SCRIPT_PATH}"/guess-account.sh)" \
         || die "Could not deduce an account to use."
 fi
 
