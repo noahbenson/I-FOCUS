@@ -103,5 +103,5 @@ echo "-------------------------------------------------------------------------"
 echo "To connect to Jupyter, point your browser to localhost:7777"
 
 # Now wait for the tunnel to exit before exiting ourselves.
-while ifocus_isrunning; do sleep 5; done
+while ${SCRIPT_DIR}/jupyter-query.sh &>/dev/null; do sleep 5; done
 exit 0

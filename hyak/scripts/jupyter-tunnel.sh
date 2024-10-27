@@ -28,6 +28,9 @@ cd
 
 # Establish the Tunnel #########################################################
 
+# Claim ownership of the status.
+ifocus_start
+
 # Wait for the run script to appear...
 echo "Waiting for startup script to initialize..."
 echo ""
