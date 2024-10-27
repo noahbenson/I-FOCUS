@@ -232,7 +232,7 @@ done
 # A few of the variables like the tunnel directory come from a combination of
 # the above:
 IFOCUS_COMMAND_PATH="${IFOCUS_PATH}/work/${IFOCUS_COMMAND}"
-IFOCUS_WORK_PATH="${IFOCUS_COMMAND_PATH}/${IFOCUS_TAG}"
+IFOCUS_WORK_PATH="${IFOCUS_COMMAND_PATH}/${IFOCUS_TAG:-default}"
 IFOCUS_JOB_FILE="${IFOCUS_WORK_PATH}/jobdata.sh"
 IFOCUS_STATUS_FILE="${IFOCUS_WORK_PATH}/status"
 
