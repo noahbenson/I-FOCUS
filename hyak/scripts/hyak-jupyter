@@ -108,6 +108,7 @@ set | grep "^${IFOCUS_SLURM_PREFIX}" \
    >> "${IFOCUS_JOB_FILE}"
 echo "export SLURM_ARGS=(${SLURM_ARGS[@]@Q})" >> "${IFOCUS_JOB_FILE}"
 echo "export POS_ARGS=(${POS_ARGS[@]@Q})" >> "${IFOCUS_JOB_FILE}"
+declare -f ifocus_status_open >> "${IFOCUS_JOB_FILE}"
 
 # Configure the screen that we are in.
 screen -S "${IFOCUS_SCREEN}" \
