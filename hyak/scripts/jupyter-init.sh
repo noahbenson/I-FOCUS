@@ -61,9 +61,10 @@ do if   [ "${ARG}" = "--lab" ]
    fi
 done
 
-# Note the socket file.
+# Note the socket files and run script.
 IFOCUS_JUPYTER_SOCKET_FILE="${IFOCUS_WORK_PATH}/socket.sock"
 IFOCUS_JUPYTER_LOGIN_FILE="${IFOCUS_WORK_PATH}/login.sock"
+IFOCUS_JUPYTER_RUN_SCRIPT="${IFOCUS_WORK_PATH}/run.sh"
 
 
 # Export Configuration #########################################################
