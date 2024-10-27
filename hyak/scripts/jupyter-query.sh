@@ -27,4 +27,5 @@ LNS=$(squeue -j "${SLURM_JOB_ID}" -u "${USER}" 2>/dev/null | wc -l)
 [ "$LNS" -eq 2 ] || exit 1
 
 # The tests pass so it's still running.
+echo "SLURM_JOB_ID=${SLURM_JOB_ID}"
 exit 0

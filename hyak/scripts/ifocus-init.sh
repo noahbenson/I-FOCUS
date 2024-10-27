@@ -8,6 +8,8 @@
 # any of the environment variables are already set, those values are used by
 # default.
 
+function die { echo "ERROR: $*" 1>&2; exit 1; }
+
 
 # Configuration ################################################################
 # The configuration is handles by the ifocus-config.sh script; to call this, we
@@ -30,6 +32,14 @@ IFOCUS_PATH="${IFOCUS_PATH:-${IFOCUS_PATH_DEFAULT}}"
 # running an salloc command, this should instead of SALLOC_. The SALLOC_ prefix
 # can also be set with the --salloc option.
 IFOCUS_SLURM_PREFIX="${IFOCUS_SLURM_PREFIX:-SLURM_}"
+
+# If there is no IFOCUS_COMMAND defined, we set it to a default value.
+IFOCUS_COMMAND_DEFAULT="none"
+if [ -z "${IFOCUS_COMMAND}" ]
+then echo "WARNING: Setting IFOCUS_COMMAND to '${IFOCUS_COMMAND_DEFAULT}'" 1>&2
+     IFOCUS_COMMAND="${IFOCUS_COMMAND_DEFAULT}"
+fi
+
 
 # SLURM Initialization ---------------------------------------------------------
 
@@ -83,6 +93,17 @@ do case "$1" in
 	   IFOCUS_PATH="${1:14}"
 	   shift
 	   ;;
+       # We also allow the specification of a screen for those commands that use
+       # screens.
+       --screen)
+           IFOCUS_SCREEN="$2"
+           shift
+           shift
+           ;;
+       --screen=*)
+           IFOCUS_SCREEN="${1:9}"
+           shift
+           ;;
        # We can specify a SLURM prefix; this is usually SLURM_ for the srun
        # command, but the salloc takes SALLOC_ variables.
        --slurm-prefix)
@@ -205,17 +226,44 @@ do case "$1" in
    esac
 done
 
+
+# Checks and Logic #############################################################
+
 # A few of the variables like the tunnel directory come from a combination of
 # the above:
-IFOCUS_TUNNELS_DIR="${IFOCUS_PATH}/tunnels"
-IFOCUS_TUNNEL_DIR="${IFOCUS_TUNNELS_DIR}/${IFOCUS_TAG}"
-IFOCUS_JOB_FILE="${IFOCUS_TUNNEL_DIR}/jobdata.sh"
+IFOCUS_COMMAND_PATH="${IFOCUS_PATH}/work/${IFOCUS_COMMAND}"
+IFOCUS_WORK_PATH="${IFOCUS_COMMAND_PATH}/${IFOCUS_TAG}"
+IFOCUS_JOB_FILE="${IFOCUS_WORK_PATH}/jobdata.sh"
+IFOCUS_STATUS_FILE="${IFOCUS_WORK_PATH}/status"
+
+# If IFOCUS_SCREEN isn't set, its default value is <command>-<tag> or
+# just <command> if tag isn't set.
+if [ -z "${IFOCUS_SCREEN}" ]
+then if [ -z "${IFOCUS_TAG}" ]
+     then IFOCUS_SCREEN="${IFOCUS_COMMAND}"
+     else IFOCUS_SCREEN="${IFOCUS_COMMAND}-${IFOCUS_TAG}"
+     fi
+fi
 
 # We may need to auto-detect the the account.
 if [ -z "${SLURM_ACCOUNT}" ]
-then SLURM_ACCOUNT="$(guess-account.sh)" \
+then SLURM_ACCOUNT="$("${IFOCUS_BIN_PATH}"/guess-account.sh)" \
         || die "Could not deduce an account to use."
 fi
+
+# If the work path doesn't exist, we should go ahead and make it.
+[ -d "${IFOCUS_WORK_PATH}" ] \
+    || mkdir -p "${IFOCUS_WORK_PATH}" \
+    || die "Could not make work directory: ${IFOCUS_WORK_PATH}"
+
+# We can now write a function for opening the status file.
+function ifocus_status_open {
+    touch "${IFOCUS_STATUS_FILE}"
+    function ifocus_status_close {
+        [ -w "${IFOCUS_STATUS_FILE}" ] && rm -f "${IFOCUS_STATUS_FILE}"
+    }
+    trap ifocus_status_close EXIT SIGINT SIGTERM SIGQUIT SIGILL SIGABRT
+}
 
 
 # Export Configuration #########################################################
@@ -224,42 +272,34 @@ fi
 
 # We can grab most of the variables we need from the set command:
 set | grep "^IFOCUS_" \
+    | grep -v '=$' \
+    | grep -v '^IFOCUS_[^=]_DEFAULT=' \
     | sed "s/^IFOCUS_/export IFOCUS_/g"
 # For the SLURM_ variables, we might need to convert them to SALLOC_ or some
 # other prefix.
 set | grep "^SLURM_" \
-    | sed "s/^SLURM_/${IFOCUS_SLURM_PREFIX}=/g"
+    | grep -v '=$' \
+    | grep -v '^SLURM_[^=]*_DEFAULT=' \
+    | sed "s/^SLURM_/export ${IFOCUS_SLURM_PREFIX}/g"
+# We also want to export our function:
+declare -f ifocus_status_open
 
 # We want to export SLURM_ARGS, and we want that variable name to be SLURM_ARGS
 # whether the ifocus slurm prefix is SALLOC_ or SLURM_
-SLURM_ARGS=(--account="${SLURM_ACCOUNT}")
-if [ -n "${SLURM_PARTITION}" ]
-then SLURM_ARGS+=(--partition="${SLURM_PARTITION}")
-fi
-if [ -n "${SLURM_MEM_PER_NODE}" ]
-then SLURM_ARGS+=(--mem="${SLURM_MEM_PER_NODE}")
-fi
-if [ -n "${SLURM_NNODES}" ]
-then SLURM_ARGS+=(--nodes="${SLURM_NNODES")
-fi
-if [ -n "${SLURM_NTASKS}" ]
-then SLURM_ARGS+=(--ntasks="${SLURM_NTASKS}")
-fi
-if [ -n "${SLURM_NTASKS_PER_NODE}" ]
-then SLURM_ARGS+=(--ntasks-per-node="${SLURM_NTASKS_PER_NODE}")
-fi
-if [ -n "${SLURM_CPUS_PER_TASK}" ]
-then SLURM_ARGS+=(--="${SLURM_CPUS_PER_TASK}")
-fi
-if [ -n "${SLURM_}" ]
-then SLURM_ARGS+=(--="${SLURM_}")
-fi
-if [ -n "${SLURM_}" ]
-then SLURM_ARGS+=(--="${SLURM_}")
-fi
-if [ -n "${SLURM_}" ]
-then SLURM_ARGS+=(--="${SLURM_}")
-fi
+SLURM_ALLARGS=(
+    --account="${SLURM_ACCOUNT}"
+    --partition="${SLURM_PARTITION}"
+    --mem="${SLURM_MEM_PER_NODE}"
+    --nodes="${SLURM_NNODES"
+    --ntasks="${SLURM_NTASKS}"
+    --ntasks-per-node="${SLURM_NTASKS_PER_NODE}"
+    --cpus-per-task="${SLURM_CPUS_PER_TASK}")
+# Filter out the empty arguments.
+SLURM_ARGS=()
+for ARG in "${SLURM_ALLARGS[@]}"
+do [ "${ARG: -1}" != "=" ] && SLURM_ARGS+=("${ARG}")
+done
+# Print these as part of the configuration.
 echo "export SLURM_ARGS=(${SLURM_ARGS[@]@Q})"
 
 # The only thing left is the POS_ARGS list.

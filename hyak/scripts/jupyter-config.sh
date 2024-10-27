@@ -36,8 +36,8 @@ HYAK_JUPYTER_SUBCMD_DEFAULT="lab"
 # open multiple jupyter sessions at once
 HYAK_JUPYTER_TAG_DEFAULT="default"
 
-# The name given to the screen session.
-HYAK_JUPYTER_SCREEN_NAME_DEFAULT="jupyter"
+# The name given to the screen session; if blank, then uses the tag.
+HYAK_JUPYTER_SCREEN_NAME_DEFAULT=""
 
 # If SLURM memory isn't specified, we go with 12G.
 SLURM_MEM_PER_NODE_DEFAULT=12G
@@ -47,7 +47,7 @@ SLURM_NTASKS_PER_NODE_DEFAULT=4
 
 # We want to auto-detect an account.
 SLURM_ACCOUNT_DEFAULT=$(
-    groups | sed -E 's/(all)|(test)| //g' | cut -d ' ' -f 1)
+    groups | sed -E 's/(all)|(test)//g' | sed -E s'/  / /g' | cut -d ' ' -f 1)
 
 # We also want to use a sensible choice for partition.
 SLURM_PARTITION_DEFAULT=ckpt-all
@@ -59,6 +59,8 @@ HYAK_JUPYTER_DIR="${HYAK_JUPYTER_DIR:-${HYAK_JUPYTER_DIR_DEFAULT}}"
 HYAK_JUPYTER_SUBCMD="${HYAK_JUPYTER_SUBCMD:-${HYAK_JUPYTER_SUBCMD_DEFAULT}}"
 HYAK_JUPYTER_TAG="${HYAK_JUPYTER_TAG:-${HYAK_JUPYTER_TAG_DEFAULT}}"
 HYAK_JUPYTER_SCREEN_NAME="${HYAK_JUPYTER_SCREEN_NAME:-${HYAK_JUPYTER_SCREEN_NAME_DEFAULT}}"
+[ -z "${HYAK_JUPYTER_SCREEN_NAME}" ] \
+    && HYAK_JUPYTER_SCREEN_NAME="jupyter-${HYAK_JUPYTER_TAG}"
 
 # SLURM ------------------------------------------------------------------------
 

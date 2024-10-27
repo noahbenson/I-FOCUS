@@ -17,89 +17,119 @@ function die {
 
 # Configuration ################################################################
 
-# The directory containing the rest of the hyak-jupyter scripts. This can be
-# overloaded via the environment variable HYAK_JUPYTER_BIN.
-# The scripts in this directory are essentially "private" to the hyak-jupyter
-# program and aren't intended to be called directly.
-BINDIR="${HYAK_JUPYTER_BIN:-${HOME}/.hyak-jupyter/bin}"
+# The directory containing our local I-FOCUS data. This should not be changed
+# unless you have multiple installations of the I-FOCUS tools.
+IFOCUS_PATH="${IFOCUS_PATH:-${HOME}/.i-focus}"
+# The scripts in the IFOCUS_BIN_PATH are essentially "private" to the I-FOCUS
+# programs and aren't intended to be called directly by the user.
+IFOCUS_BIN_PATH="${IFOCUS_BIN_PATH:-${IFOCUS_PATH}/bin}"
+# It's easiest to just put the IFOCUS_BIN_PATH on the PATH. POSIX requires that
+# the PATH is searched left-to-right, so putting IFOCUS_BIN_PATH firsts ensures
+# that our scripts are always called (and not some other scripts on the PATH
+# that accidentally have the same name).
+PATH="${IFOCUS_BIN_PATH}:${PATH}"
 
-# It's easiest to just put the BINDIR on the PATH. POSIX requires that the PATH
-# is searched left-to-right, so putting BINDIR firsts ensures that our scripts
-# are always called (and not some other scripts on the PATH that accidentally
-# have the same name).
-PATH="${BINDIR}:${PATH}"
-
-# The rest of the configuration can be loaded using the jupyter-config.sh script
-# in the BINDIR.
-eval "$(jupyter-config.sh "$@")"
+# The rest of the configuration can be loaded using the ifocus-init.sh script
+# and the jupyter-init.sh script, both in the IFOCUS_BIN_PATH.
+# The jupyter-init.sh script runs the ifocus-init.sh script and exports all of
+# its variables, so only the latter is required.
+eval "$(jupyter-init.sh "$@")"
 
 
 # Sanity Checking ##############################################################
 
 # If Jupyter is already running, just error out right away.
-jupyter-query.sh "$@" && {
-    echo "Jupyter is already running:"
-    jupyter-query.sh print
+query=$(jupyter-query.sh "$@") && {
+    eval "${query}"
+    echo -n "Jupyter is already running with SLURM job id ${SLURM_JOB_ID}"
+    echo    " on screen ${IFOCUS_SCREEN}."
     exit 1
 }
 
-# Make sure we can create a tunnel directory.
-mkdir -p "${HYAK_JUPYTER_TUNNEL_DIR}" \
-    || die "Could not make tunnel directory: ${HYAK_JUPYTER_TUNNEL_DIR}"
-
-# If a previous run's scripts and such are still present, clear them out.
-[ -e "${HYAK_JUPYTER_SOCKET_FILE}" ] && rm "${HYAK_JUPYTER_SOCKET_FILE}"
-[ -e "${HYAK_JUPYTER_LOGIN_FILE}" ]  && rm "${HYAK_JUPYTER_LOGIN_FILE}"
-[ -e "${HYAK_JUPYTER_JOB_FILE}" ]    && rm "${HYAK_JUPYTER_JOB_FILE}"
-[ -e "${HYAK_JUPYTER_RUN_SCRIPT}" ]  && rm "${HYAK_JUPYTER_RUN_SCRIPT}"
-
 # At this point, if we are not in a screen, put us in one.
-[ -z "$STY" ] \
-    && exec screen -S "${HYAK_JUPYTER_SCREEN_NAME}" /bin/bash "$0" "$@"
-
-# Configure the screen that we are in.
-screen -S "${HYAK_JUPYTER_SCREEN_NAME}" -X screen \
-   "${BINDIR}/jupyter-tunnel.sh" "$@"
-screen -S "${HYAK_JUPYTER_SCREEN_NAME}" -X caption always \
-   "%{= RW}To detach, press control + a then d. To reattach: screen -x ${HYAK_JUPYTER_SCREEN_NAME}"
-screen -S "${HYAK_JUPYTER_SCREEN_NAME}" -X prev
+if [ -z "$STY" ]
+then # Before we start the screen, make sure there isn't already one running:
+     SCREENS=(
+         $(screen -list
+           | tr "\t" " " | grep -E '^ +[^ ]+'
+           | sed -E "s/^ +([0-9]+)\.([^ ]+) .*$/\1 '\2'/g"))
+     ii=0
+     while [ $ii -lt ${#SCREENS[@]} ]
+     do SPID=${SCREENS[$ii]}
+        ii=$(( ${ii} + 1 ))
+        SNAME=${SCREENS[$ii]}
+        ii=$(( ${ii} + 1 ))
+        if [ ${SNAME} = ${IFOCUS_SCREEN} ]
+        then echo "A screen with the name '${SNAME}' (PID ${SPID}) is already"
+             echo "running, but its ifocus-jupter process appears to be dead."
+             read -p "Kill this screen ([y]/n)? " KILLSCREEN
+             if [ "${KILLSCREEN}" = "y" ] || [ "${KILLSCREEN}" = "yes" ]
+             then screen -S "${SPID}.${SNAME}" -X quit &>/dev/null
+             fi
+        fi
+     done
+     # Once that is taken care of, start the screen process:
+     exec screen -S "${IFOCUS_SCREEN}" /bin/bash "$0" "$@"
+fi
 
 # Everything checks out; we can export our environment and run it now.
-echo "Starting Jupyter using the tag ${HYAK_JUPYTER_TAG}..."
+echo "Starting Jupyter using the tag ${IFOCUS_SCREEN}..."
 echo ""
 echo "SLURM Configuration:"
-set | grep '^SLURM' | grep -v '_DEFAULT=' | sed -E 's/^/   - /g'
+set | grep "^${IFOCUS_SLURM_PREFIX}" \
+    | grep -v '_DEFAULT=' \
+    | sed -E 's/^/   - /g'
 echo ""
-if [ -n "${SRUN_ARGS[@]}" ]
-then echo "Additional Arguments:"
-     echo "   ${SRUN_ARGS[@]}"
+if [ -n "${SLURM_ARGS[*]}" ]
+then echo "SLURM Arguments:"
+     echo "   ${SLURM_ARGS[@]}"
      echo ""
 fi
+if [ -n "${POS_ARGS[*]}" ]
+then echo "Additional Arguments:"
+     echo "   ${POS_ARGS[@]}"
+     echo ""
+fi
+
+# Write the Job File:
+set | grep "^IFOCUS_" \
+    | grep -vE '^[^=]+_DEFAULT=' \
+    | sed 's/^/export /g' \
+    > "${IFOCUS_JOB_FILE}"
+set | grep "^${IFOCUS_SLURM_PREFIX}" \
+    | grep -vE '^[^=]+_DEFAULT=' \
+    | grep -v '^SLURM_ARGS=' \
+    | sed 's/^/export /g' \
+   >> "${IFOCUS_JOB_FILE}"
+echo "export SLURM_ARGS=(${SLURM_ARGS[@]@Q})"
+echo "export POS_ARGS=(${POS_ARGS[@]@Q})"
+
+# Configure the screen that we are in.
+screen -S "${IFOCUS_SCREEN}" \
+       -X screen \
+       "${IFOCUS_BIN_PATH}/jupyter-tunnel.sh" "${IFOCUS_JOB_FILE}"
+IFOCUS_SCREEN_MSG=(
+    "%{= RW}To detach, press control + a then d."
+    "To reattach: screen -x ${IFOCUS_SCREEN}")
+screen -S "${IFOCUS_SCREEN}" -X caption always "${IFOCUS_SCREEN_MSG[*]}"
+screen -S "${IFOCUS_SCREEN}" -X prev
+
+# Print a message about what's going on...
+echo "Allocating node..."
 echo "This may take a few minutes, depending on the system usage right now and"
 echo "how many resources you have requested for this session."
 
-# We need to export the important parts of the environment now.
-eval "$(
-   set | grep '^(HYAK_JUPYTER_)|(SLURM_)' | sed 's/^/export /g')"
-export JOBOUT="${TUNNEL_DIR}/startup.out"
-export JOBERR="${TUNNEL_DIR}/startup.err"
-
-# Run the job.
-srun --account="${SLURM_ACCOUNT}" \
-     --partition="${SLURM_PARTITION}" \
-     --mem="${SLURM_MEM_PER_NODE}" \
-     -N "${SLURM_NNODES}" \
-     --ntasks-per-node="${SLURM_NTASKS_PER_NODE}" \
-     --pty \
-     "${SRUN_ARGS[@]}" \
-     -- \
-     /bin/bash "${BINDIR}/jupyter-start.sh" "$@"
+# Allocate/run the job.
+export JOBOUT="${IFOCUS_WORK_PATH}/stdout.txt"
+export JOBERR="${IFOCUS_WORK_PATH}/stderr.txt"
+srun --pty "${SLURM_ARGS[@]}" -- \
+     /bin/bash "${IFOCUS_BIN_PATH}/jupyter-start.sh" "${IFOCUS_JOB_FILE}"
 SRUN_RVAL="$?"
 
 # Clean up and exit.
 echo ""
 echo "Jupyter exited with status ${SRUN_RVAL}."
-[ -e "${HYAK_JUPYTER_SOCKET_FILE}" ] && rm "${HYAK_JUPYTER_SOCKET_FILE}"
+[ -e "${IFOCUS_JUPYTER_SOCKET_FILE}" ] && rm "${IFOCUS_JUPYTER_SOCKET_FILE}"
 echo ""
 read -n1 -p "Press enter to exit." KEYPRESS
 exit ${SRUN_RVAL}
