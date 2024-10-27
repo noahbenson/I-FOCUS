@@ -75,9 +75,14 @@ fi
 # Everything checks out; we can export our environment and run it now.
 echo "Starting Jupyter using the tag ${IFOCUS_SCREEN}..."
 echo ""
+echo "I-FOCUS Configuration:"
+set | grep "^IFOCUS_" \
+    | grep -vE '^IFOCUS_[^=]+_DEFAULT=' \
+    | sed -E 's/^/   - /g'
+echo ""
 echo "SLURM Configuration:"
 set | grep "^${IFOCUS_SLURM_PREFIX}" \
-    | grep -v '_DEFAULT=' \
+    | grep -vE '^[^=]+_DEFAULT=' \
     | sed -E 's/^/   - /g'
 echo ""
 if [ -n "${SLURM_ARGS[*]}" ]
@@ -101,8 +106,8 @@ set | grep "^${IFOCUS_SLURM_PREFIX}" \
     | grep -v '^SLURM_ARGS=' \
     | sed 's/^/export /g' \
    >> "${IFOCUS_JOB_FILE}"
-echo "export SLURM_ARGS=(${SLURM_ARGS[@]@Q})"
-echo "export POS_ARGS=(${POS_ARGS[@]@Q})"
+echo "export SLURM_ARGS=(${SLURM_ARGS[@]@Q})" >> "${IFOCUS_JOB_FILE}"
+echo "export POS_ARGS=(${POS_ARGS[@]@Q})" >> "${IFOCUS_JOB_FILE}"
 
 # Configure the screen that we are in.
 screen -S "${IFOCUS_SCREEN}" \
