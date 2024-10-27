@@ -67,9 +67,10 @@ then # Before we start the screen, make sure there isn't already one running:
         if [ ${SNAME} = ${IFOCUS_SCREEN} ]
         then echo "A screen with the name '${SNAME}' (PID ${SPID}) is already"
              echo "running, but its ifocus-jupter process appears to be dead."
-             read -n1 -p "Kill this screen ([y]/n)? " KILLSCREEN
-             if [ "${KILLSCREEN}" = "y" ] || [ "${KILLSCREEN}" = "yes" ]
-             then screen -S "${SPID}.${SNAME}" -X quit &>/dev/null
+             read -p "Kill this screen ([y]/n)? " KILLSCREEN
+             if [ "${KILLSCREEN}" = "n" ] || [ "${KILLSCREEN}" = "no" ]
+             then die "Could not use screen with name '${SNAME}'"
+             else screen -S "${SPID}.${SNAME}" -X quit &>/dev/null
              fi
         fi
      done
@@ -116,9 +117,13 @@ echo "export POS_ARGS=(${POS_ARGS[@]@Q})" >> "${IFOCUS_JOB_FILE}"
 declare -f ifocus_status_open >> "${IFOCUS_JOB_FILE}"
 
 # We also want to make sure that there is no run script (it shouldn't be written
-# until the node has been allocated).
+# until the node has been allocated). Same with the socket files.
 [ -w "${IFOCUS_JUPYTER_RUN_SCRIPT}" ] \
     && rm -f "${IFOCUS_JUPYTER_RUN_SCRIPT}"
+[ -w "${IFOCUS_JUPYTER_SOCKET_FILE}" ] \
+    && rm -f "${IFOCUS_JUPYTER_SOCKET_FILE}"
+[ -w "${IFOCUS_JUPYTER_LOGIN_FILE}" ] \
+    && rm -f "${IFOCUS_JUPYTER_LOGIN_FILE}"
 
 # Configure the screen that we are in.
 screen -S "${IFOCUS_SCREEN}" \
