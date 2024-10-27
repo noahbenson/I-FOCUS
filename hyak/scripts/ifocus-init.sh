@@ -268,7 +268,7 @@ function ifocus_start {
     }
     trap ifocus_status_cleanup EXIT SIGINT SIGTERM SIGQUIT SIGILL SIGABRT
 }
-# ifocus_isrunning && echo "ifocus job is already running!"
+# Usage: ifocus_isrunning && echo "ifocus job is already running!"
 function ifocus_isrunning {
     if [ -r "${IFOCUS_STATUS_FILE}" ]
     then return 0

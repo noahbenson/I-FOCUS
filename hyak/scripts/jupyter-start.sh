@@ -39,8 +39,9 @@ mkdir -p "${IFOCUS_WORK_PATH}" \
 # the scripts.
 ifocus_start
 
-# Write the nodename out to the job data file:
+# Write the nodename and job ID out to the job data file:
 echo "export SLURMD_NODENAME=${SLURMD_NODENAME}" >> "${IFOCUS_JOB_FILE}"
+echo "export SLURM_JOB_ID=${SLURM_JOB_ID}" >> "${IFOCUS_JOB_FILE}"
 
 # Write out the command for the server:
 if [ "${IFOCUS_JUPYTER_CMD}" = "lab" ]
