@@ -7,6 +7,11 @@
 # configuration data from ifocus-init.sh.
 
 
+# Utilities ####################################################################
+
+function die { echo "ERROR: $*" 1>&2; exit 1; }
+
+
 # Configuration ################################################################
 # The configuration is handles by the ifocus-config.sh script; to call this, we
 # just need to know the directory of the current script, which will always be
