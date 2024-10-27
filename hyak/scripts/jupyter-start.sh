@@ -53,7 +53,7 @@ cat >"${IFOCUS_JUPYTER_RUN_SCRIPT}" <<EOF
 cd
 
 # A useful function for erroring out:
-function die { echo "ERROR: $*" 1>&2; exit 1; }
+function die { echo "ERROR: \$*" 1>&2; exit 1; }
 
 # Start by sourcing the job file:
 source "${IFOCUS_JOB_FILE}"
