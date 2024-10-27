@@ -43,23 +43,28 @@ query=$(jupyter-query.sh "$@") && {
     eval "${query}"
     echo "Jupyter is already running with SLURM job id ${SLURM_JOB_ID}"
     echo "on screen ${IFOCUS_SCREEN}."
-    echo ""
+    echo "If you wish to reattach that screen, then select n (do not kill"
+    echo "this job) then use the command: screen -x ${IFOCUS_SCREEN@Q}"
     echo ""
     read -p "Kill this job and restart Jupyter (y/[n])? " RESTART_SCREEN
-    if [ "${RESTART_SCREEN}" = "y" ] || [ "${RESTART_SCREEN}" = "Y" ]
-    then scancel "${SLURM_JOB_ID}"
-         ii=0
-         while ifocus_running && [ $ii -lt 10 ]
-         do sleep 2; ii=$(( $ii + 1 ))
-         done
-         [ -w "${IFOCUS_STATUS_FILE}" ] && {
-             echo "WARNING:" 1>&2
-             echo "  `scancel ${SLURM_JOB_ID}` did not clear status." 1>&2
-             echo "  Manually deleting status file instead: " 1>&2
-             echo "    ${IFOCUS_STATUS_FILE}" 1>&2
-             rm -f "${IFOCUS_STATUS_FILE}"
-         }
-    else exit 1
+    if   [ "${RESTART_SCREEN}" != "y" ] && [ "${RESTART_SCREEN}" != "Y" ]
+    then exit 1
+    fi
+    scancel "${SLURM_JOB_ID}"
+    screen -S "${IFOCUS_SCREEN}" -X quit &>/dev/null
+    ii=0
+    while ifocus_running && [ $ii -lt 5 ]
+    do sleep 2; ii=$(( $ii + 1 ))
+    done
+    if [ -w "${IFOCUS_STATUS_FILE}" ]
+    then echo "WARNING: `scancel ${SLURM_JOB_ID}` didn't clear status file:"
+         echo "         ${IFOCUS_STATUS_FILE}"
+         echo ""
+         read -p "Manually delete status file (y/[n])? " DELETE_STATUS
+         if [ "${DELETE_STATUS}" != "y" ] && [ "${DELETE_STATUS}" != "Y" ]
+         then exit 1
+         fi
+         rm -f "${IFOCUS_STATUS_FILE}"
     fi
 }
 
@@ -71,6 +76,8 @@ then # Before we start the screen, make sure there isn't already one running:
            | tr "\t" " " | grep -E '^ +[^ ]+' \
            | sed -E "s/^ +([0-9]+)\.([^ ]+) .*$/\1 '\2'/g"))
      ii=0
+     echo "Screens: ${SCREENS[@]@Q}"
+     read -p "..." TMPNONSENSE
      while [ $ii -lt ${#SCREENS[@]} ]
      do SPID=${SCREENS[$ii]}
         ii=$(( ${ii} + 1 ))
@@ -79,6 +86,7 @@ then # Before we start the screen, make sure there isn't already one running:
         if [ ${SNAME} = ${IFOCUS_SCREEN} ]
         then echo "A screen with the name '${SNAME}' (PID ${SPID}) is already"
              echo "running, but its ifocus-jupter process appears to be dead."
+             echo ""
              read -p "Kill this screen ([y]/n)? " KILLSCREEN
              if [ "${KILLSCREEN}" = "n" ] || [ "${KILLSCREEN}" = "no" ]
              then die "Could not use screen with name '${SNAME}'"
