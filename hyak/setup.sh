@@ -19,7 +19,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 # First thing is to copy all the executables into the bin directory:
 cp "${SCRIPT_DIR}"/scripts/*.sh "${BINDIR}" \
-    && chmod 755 "${BINDIR}/*.sh" \
+    && chmod 755 "${BINDIR}"/*.sh \
     || die "Could not copy helper scripts to ${BINDIR}"
 # Also put the hyak-jupyter script in the ~/.local/bin directory:
 mkdir -p "${HOME}/.local/bin" \
