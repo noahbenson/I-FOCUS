@@ -115,6 +115,12 @@ echo "export SLURM_ARGS=(${SLURM_ARGS[@]@Q})" >> "${IFOCUS_JOB_FILE}"
 echo "export POS_ARGS=(${POS_ARGS[@]@Q})" >> "${IFOCUS_JOB_FILE}"
 declare -f ifocus_status_open >> "${IFOCUS_JOB_FILE}"
 
+# We also want to make sure that there is no run script (it shouldn't be written
+# until the node has been allocated).
+[ -w "${IFOCUS_JUPYTER_RUN_SCRIPT}" ] \
+    && rm -f "${IFOCUS_JUPYTER_RUN_SCRIPT}" \
+    || die "Could not delete run script: ${IFOCUS_JUPYTER_RUN_SCRIPT}"
+
 # Configure the screen that we are in.
 screen -S "${IFOCUS_SCREEN}" \
        -X screen \
