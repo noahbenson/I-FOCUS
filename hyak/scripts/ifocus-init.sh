@@ -125,6 +125,19 @@ do case "$1" in
            ;;
        # We also interpret a number of SLURM arguments (so that we can have or
        # guess default values).
+       -t|--time)
+           SLURM_TIMELIMIT="$2"
+           shift
+           shift
+           ;;
+       -t*)
+           SLURM_TIMELIMIT="${1:2}"
+           shift
+           ;;
+       --time=*)
+           SLURM_TIMELIMIT="${1:7}"
+           shift
+           ;;
        --mem)
            SLURM_MEM_PER_NODE="$2"
            shift
@@ -236,6 +249,10 @@ IFOCUS_WORK_PATH="${IFOCUS_COMMAND_PATH}/${IFOCUS_TAG:-default}"
 IFOCUS_JOB_FILE="${IFOCUS_WORK_PATH}/jobdata.sh"
 IFOCUS_STATUS_FILE="${IFOCUS_WORK_PATH}/status"
 
+# If no timelimit was given, we error out.
+[ -z "${SLURM_TIMELIMIT}" ] \
+    && die "No time-limit given; use --time=H:MM:SS or -t H:MM:SS"
+
 # If IFOCUS_SCREEN isn't set, its default value is <command>-<tag> or
 # just <command> if tag isn't set.
 if [ -z "${IFOCUS_SCREEN}" ]
@@ -300,6 +317,7 @@ declare -f ifocus_start ifocus_isrunning
 SLURM_ALLARGS=(
     --account="${SLURM_ACCOUNT}"
     --partition="${SLURM_PARTITION}"
+    --time="${SLURM_TIMELIMIT}"
     --mem="${SLURM_MEM_PER_NODE}"
     --nodes="${SLURM_NNODES}"
     --ntasks="${SLURM_NTASKS}"
