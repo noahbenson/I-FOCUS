@@ -39,7 +39,7 @@ eval "$(ifocus-init.sh "$@")"
 # If --no-screen is included, we don't use a screen.
 IFOCUS_SH_USE_SCREEN=yes
 POS_ALLARGS=("${POS_ARGS[@]}")
-POS_ARGS=()p
+POS_ARGS=()
 for ARG in "${POS_ALLARGS[@]}"
 do case "${ARG}" in
        --no-screen)
