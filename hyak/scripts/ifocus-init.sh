@@ -66,13 +66,11 @@ do case "$1" in
        # Multiple commands use images, so we parse them as --image:
        --image)
 	   IFOCUS_IMAGE="$2"
-           echo "-- ${IFOCUS_IMAGE}"
 	   shift
 	   shift
 	   ;;
        --image=*)
 	   IFOCUS_IMAGE="${1:8}"
-           echo "-+ ${IFOCUS_IMAGE}"
 	   shift
 	   ;;
        # Similarly, some of the commands can be given tags via --tag:
@@ -170,11 +168,9 @@ do case "$1" in
        -n*)
            SLURM_NTASKS="${1:2}"
            shift
-           shift
            ;;
        --ntasks=*)
            SLURM_NTASKS="${1:9}"
-           shift
            shift
            ;;
        --ntasks-per-node)
@@ -194,11 +190,9 @@ do case "$1" in
        -c*)
            SLURM_CPUS_PER_TASK="${1:2}"
            shift
-           shift
            ;;
        --cpus-per-task=*)
            SLURM_CPUS_PER_TASK="${1:16}"
-           shift
            shift
            ;;
        -A|--account)
