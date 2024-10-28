@@ -110,6 +110,7 @@ echo ""
 echo "SLURM Configuration:"
 set | grep "^${IFOCUS_SLURM_PREFIX}" \
     | grep -vE '^[^=]+_DEFAULT=' \
+    | grep -v '^SLURM_ARGS=' \
     | sed -E 's/^/   - /g'
 echo ""
 if [ -n "${SLURM_ARGS[*]}" ]

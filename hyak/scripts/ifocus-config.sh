@@ -26,9 +26,9 @@ SLURM_NTASKS_DEFAULT=1
 SLURM_CPUS_PER_TASK_DEFAULT=4
 
 # If the SLURM_ACCOUNT is empty, we auto-detect an account using the
-# guess-account.sh script. This is desired behavior, so we leave the
-# default blank.
+# guess-account.sh script. This is desired behavior, so we leave the default
+# blank.
 SLURM_ACCOUNT_DEFAULT=""
 
-# We also want to use a sensible choice for partition.
-SLURM_PARTITION_DEFAULT=ckpt-all
+# If the SLURM_PARTITION is empty, we auto-detect using the guess-partition.sh script (which requires the partition as an argument).
+SLURM_PARTITION_DEFAULT=""

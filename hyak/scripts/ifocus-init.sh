@@ -258,10 +258,16 @@ then if [ -z "${IFOCUS_TAG}" ]
      fi
 fi
 
-# We may need to auto-detect the the account.
+# We may need to auto-detect the account.
 if [ -z "${SLURM_ACCOUNT}" ]
 then SLURM_ACCOUNT="$("${SCRIPT_PATH}"/guess-account.sh)" \
         || die "Could not deduce an account to use."
+fi
+
+# We may also need to auto-detect the partition.
+if [ -z "${SLURM_PARTITION}" ]
+then SLURM_PARTITION="$(${SCRIPT_PATH}/guess-partition.sh "${SLURM_ACCOUNT}")" \
+        || die "Could not deduce a partition to use."
 fi
 
 # If the work path doesn't exist, we should go ahead and make it.
