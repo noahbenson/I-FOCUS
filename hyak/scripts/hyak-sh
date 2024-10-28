@@ -1,0 +1,142 @@
+#! /bin/bash
+################################################################################
+# Starts up a bash session instance on a Hyak node.
+
+
+# Utilities ####################################################################
+
+# A function to print an error then exit with an error code.
+function die { echo "ERROR:" "$@" 1>&2; exit 1; }
+
+
+# Configuration ################################################################
+
+# The directory containing our local I-FOCUS data. This should not be changed
+# unless you have multiple installations of the I-FOCUS tools.
+IFOCUS_PATH="${IFOCUS_PATH:-${HOME}/.i-focus}"
+# The scripts in the IFOCUS_BIN_PATH are essentially "private" to the I-FOCUS
+# programs and aren't intended to be called directly by the user.
+IFOCUS_BIN_PATH="${IFOCUS_BIN_PATH:-${IFOCUS_PATH}/bin}"
+# It's easiest to just put the IFOCUS_BIN_PATH on the PATH. POSIX requires that
+# the PATH is searched left-to-right, so putting IFOCUS_BIN_PATH firsts ensures
+# that our scripts are always called (and not some other scripts on the PATH
+# that accidentally have the same name).
+PATH="${IFOCUS_BIN_PATH}:${PATH}"
+
+# We have to declare the command we're running before we run the ifocus-init.sh
+# script.
+export IFOCUS_COMMAND="sh"
+
+# The rest of the configuration can be loaded using the ifocus-init.sh script
+# and the jupyter-init.sh script, both in the IFOCUS_BIN_PATH.
+# The jupyter-init.sh script runs the ifocus-init.sh script and exports all of
+# its variables, so only the latter is required.
+eval "$(ifocus-init.sh "$@")"
+
+
+# Argument Parsing #############################################################
+
+# If --no-screen is included, we don't use a screen.
+IFOCUS_SH_USE_SCREEN=yes
+POS_ALLARGS=("${POS_ARGS[@]}")
+POS_ARGS=()p
+for ARG in "${POS_ALLARGS[@]}"
+do case "${ARG}" in
+       --no-screen)
+           IFOCUS_SH_USE_SCREEN=no
+           ;;
+       *)
+           POS_ARGS+=("${ARG}")
+           ;;
+   esac
+done
+
+
+# Sanity Checking ##############################################################
+
+# At this point, if we are not in a screen, put us in one.
+if [ "${IFOCUS_SH_USE_SCREEN}" = "yes" ] && [ -z "$STY" ]
+then # Before we start the screen, make sure there isn't already one running:
+     SPIDS=( $(screen -list | tr "\t" " " | grep -E '^ +[^ ]+' \
+                            | sed -E "s/^ +([0-9]+)\.([^ ]+) .*$/\1/g"))
+     SNAMES=($(screen -list | tr "\t" " " | grep -E '^ +[^ ]+' \
+                            | sed -E "s/^ +([0-9]+)\.([^ ]+) .*$/\2/g"))
+     ii=0
+     while [ $ii -lt ${#SNAMES[@]} ]
+     do SPID=${SPIDS[$ii]}
+        SNAME=${SNAMES[$ii]}
+        ii=$(( ${ii} + 1 ))
+        if [ ${SNAME} = ${IFOCUS_SCREEN} ]
+        then echo "A screen with the name ${SNAME@Q} (PID ${SPID}) is already"
+             echo "running. You can resume this screen using the command"
+             echo "  screen -x ${SNAME@Q}"
+             echo "or you can kill this process now and start a new screen."
+             echo ""
+             read -p "Kill this screen ([y]/n)? " KILLSCREEN
+             if [ "${KILLSCREEN}" = "n" ] || [ "${KILLSCREEN}" = "no" ]
+             then die "Could not use screen with name '${SNAME}'"
+             else screen -S "${SPID}.${SNAME}" -X quit &>/dev/null
+             fi
+        fi
+     done
+     # Once that is taken care of, start the screen process:
+     exec screen -S "${IFOCUS_SCREEN}" /bin/bash "$0" "$@"
+fi
+
+
+# Execution ####################################################################
+
+# Everything checks out. At this point it's safe to claim that the hyak-sh
+# I-FOCUS job is running.
+ifocus_start
+
+# Check if we can do X11 forwarding...
+if [ -n "${DISPLAY}" ]
+then SLURM_ARGS+=("--x11")
+fi
+
+# We can export our environment and run it now.
+echo "Starting worker-node sh using the tag ${IFOCUS_SCREEN}..."
+echo ""
+echo "I-FOCUS Configuration:"
+set | grep "^IFOCUS_" \
+    | grep -vE '^IFOCUS_[^=]+_DEFAULT=' \
+    | sed -E 's/^/   - /g'
+echo ""
+echo "SLURM Configuration:"
+set | grep "^${IFOCUS_SLURM_PREFIX}" \
+    | grep -vE '^[^=]+_DEFAULT=' \
+    | sed -E 's/^/   - /g'
+echo ""
+if [ -n "${SLURM_ARGS[*]}" ]
+then echo "SLURM Arguments:"
+     echo "   ${SLURM_ARGS[@]@Q}"
+     echo ""
+fi
+if [ -n "${POS_ARGS[*]}" ]
+then echo "Additional Arguments:"
+     echo "   ${POS_ARGS[@]@Q}"
+     echo ""
+fi
+
+IFOCUS_SCREEN_MSG=(
+    "%{= RW}To detach, press control + a then d."
+    "To reattach: screen -x ${IFOCUS_SCREEN}")
+screen -S "${IFOCUS_SCREEN}" -X caption always "${IFOCUS_SCREEN_MSG[*]}"
+
+# Print a message about what's going on...
+echo "Allocating node..."
+echo "This may take a few minutes, depending on the system usage right now and"
+echo "how many resources you have requested for this session."
+
+# Allocate/run the job.
+srun --pty "${SLURM_ARGS[@]}" -- /bin/bash "${POS_ARGS[@]}"
+SRUN_RVAL="$?"
+
+# Clean up and exit.
+echo ""
+echo "bash exited with status ${SRUN_RVAL}."
+[ -e "${IFOCUS_JUPYTER_SOCKET_FILE}" ] && rm "${IFOCUS_JUPYTER_SOCKET_FILE}"
+echo ""
+read -n1 -p "Press enter to exit." KEYPRESS
+exit ${SRUN_RVAL}
