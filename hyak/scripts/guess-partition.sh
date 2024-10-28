@@ -15,7 +15,7 @@
 
 # We prefer these accounts in this order if multiple accounts are available:
 declare -A PREFERRED_PARTITIONS
-PREFERRED_PARTITIONS = (
+PREFERRED_PARTITIONS=(
     ['escience']='ckpt-all'
     ['psych']='cpu-g2-mem2x')
 
