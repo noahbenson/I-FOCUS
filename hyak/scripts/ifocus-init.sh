@@ -66,11 +66,13 @@ do case "$1" in
        # Multiple commands use images, so we parse them as --image:
        --image)
 	   IFOCUS_IMAGE="$2"
+           echo "-- ${IFOCUS_IMAGE}"
 	   shift
 	   shift
 	   ;;
        --image=*)
 	   IFOCUS_IMAGE="${1:8}"
+           echo "-+ ${IFOCUS_IMAGE}"
 	   shift
 	   ;;
        # Similarly, some of the commands can be given tags via --tag:
