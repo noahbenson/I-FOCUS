@@ -25,12 +25,14 @@ cp "${SCRIPT_DIR}"/scripts/*.sh "${BINDIR}" \
 mkdir -p "${HOME}/.local/bin" \
     || die "Could not create directory ${HOME}/.local/bin"
 cp "${SCRIPT_DIR}/scripts/hyak-jupyter" "${HOME}/.local/bin" \
+    && chod 755 "${SCRIPT_DIR}/scripts/hyak-jupyter" \
     || die "Could not copy hyak-jupyter to directory ${HOME}/.local/bin"
 cp "${SCRIPT_DIR}/scripts/hyak-sh" "${HOME}/.local/bin" \
+    && chod 755 "${SCRIPT_DIR}/scripts/hyak-sh" \
     || die "Could not copy hyak-sh to directory ${HOME}/.local/bin"
 [ -x "${SCRIPT_DIR}/scripts/hyak-matlab" ] \
-    && cp "${SCRIPT_DIR}/scripts/hyak-matlab" "${HOME}/.local/bin" #\
-    #|| die "Could not copy hyak-matlab to directory ${HOME}/.local/bin"
+    && cp "${SCRIPT_DIR}/scripts/hyak-matlab" "${HOME}/.local/bin" \
+    && chod 755 "${SCRIPT_DIR}/scripts/hyak-matab"
 
 # Finally, we want to put a line for APPTAINER in the bashrc file:
 if ! grep -q APPTAINER_CACHE "${HOME}/.bashrc"
@@ -44,7 +46,7 @@ fi
 cat <<EOF
 
 ================================================================================
-Successfully installed hyak-jupyter!
+Successfully installed hyak-jupyter and hyak-sh!
 
 To run Jupyter on Hyak, just use the command hyak-jupyter; any options that can
 be passed to the srun command can be passed to hyak-jupyter as well.
