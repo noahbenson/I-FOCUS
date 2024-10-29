@@ -1,0 +1,44 @@
+Bootstrap: docker
+From: quay.io/jupyter/datascience-notebook:lab-4.2.5
+IncludeCmd: yes
+
+%setup
+    # This is a scriptlet that will be executed on the host, as root, after the
+    # container has been bootstrapped. To install things into the container
+    # reference the file system location with $APPTAINER_ROOTFS.
+
+%files
+    #jupyter_env.yml /home/jovyan/build_env.yml
+    jupyter_reqs.txt /home/jovyan/build_reqs.txt
+
+%environment
+    export FREESURFER_HOME=/opt/freesurfer
+    export SUBJECTS_DIR=/opt/freesurfer/subjects
+
+%post
+    # This scriptlet section will be executed from within the container after
+    # the bootstrap/base has been created and setup.
+    # --
+    # Install FreeSurfer.
+    cd /opt
+    wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-centos8_x86_64-7.4.1.tar.gz
+    tar zxf freesurfer-linux-centos8_x86_64-7.4.1.tar.gz
+    rm freesurfer-linux-centos8_x86_64-7.4.1.tar.gz
+    ln -s /home/jovyan/.fslicense /opt/freesurfer/license.txt
+    # Install our libraries into the conda environment.
+    #conda env update --file /home/jovyan/build_env.yml --prune
+    pip install -r /home/jovyan/build_reqs.txt
+
+%test
+    # Define any test commands that should be executed after container has been
+    # built. This scriptlet will be executed from within the running container
+    # as the root user. Pay attention to the exit/return value of this scriptlet
+    # as any non-zero exit code will be assumed as failure.
+    python -c 'import neuropythy' || exit 1
+    python -c 'import jupyter' || exit 1
+    exit 0
+
+%help
+    This DEF file builds the Jupyter image used for the I-FOCUS project.
+    To edit the configuration of this image, the best way is to edit the
+    jupyter_env.yml conda environment file in the same directory.
