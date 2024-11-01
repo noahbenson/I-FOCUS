@@ -43,13 +43,14 @@ fi
 
 # SLURM Initialization ---------------------------------------------------------
 
-SLURM_MEM_PER_NODE=${SLURM_MEM_PER_NODE:-${SLURM_MEM_PER_NODE_DEFAULT}}
 SLURM_NNODES=${SLURM_NNODES:-${SLURM_NNODES_DEFAULT}}
 SLURM_NTASKS_PER_NODE=${SLURM_NTASKS_PER_NODE:-${SLURM_NTASKS_PER_NODE_DEFAULT}}
 SLURM_NTASKS=${SLURM_NTASKS:-${SLURM_NTASKS_DEFAULT}}
 SLURM_CPUS_PER_TASK=${SLURM_CPUS_PER_TASK:-${SLURM_CPUS_PER_TASK_DEFAULT}}
 SLURM_ACCOUNT=${SLURM_ACCOUNT:-${SLURM_ACCOUNT_DEFAULT}}
 SLURM_PARTITION=${SLURM_PARTITION:-${SLURM_PARTITION_DEFAULT}}
+SLURM_MEM_PER_NODE=${SLURM_MEM_PER_NODE:-${SLURM_MEM_PER_NODE_DEFAULT}}
+SLURM_MEM_PER_CPU=${SLURM_MEM_PER_CPU:-${SLURM_MEM_PER_CPU_DEFAULT}}
 
 
 # Arguments ####################################################################
@@ -147,7 +148,14 @@ do case "$1" in
            SLURM_MEM_PER_NODE="${1:6}"
            shift
            ;;
-       -N|-nodes)
+       --mem-per-cpu)
+           SLURM_MEM_PER_CPU="$2"
+           shift
+           shift
+       --mem-per-cpu=*)
+           SLURM_MEM_PER_CPU="${1:14}"
+           shift
+       -N|--nodes)
            SLURM_NNODES="$2"
            shift
            shift
@@ -320,11 +328,12 @@ SLURM_ALLARGS=(
     --account="${SLURM_ACCOUNT}"
     --partition="${SLURM_PARTITION}"
     --time="${SLURM_TIMELIMIT}"
-    --mem="${SLURM_MEM_PER_NODE}"
     --nodes="${SLURM_NNODES}"
     --ntasks="${SLURM_NTASKS}"
     --ntasks-per-node="${SLURM_NTASKS_PER_NODE}"
-    --cpus-per-task="${SLURM_CPUS_PER_TASK}")
+    --cpus-per-task="${SLURM_CPUS_PER_TASK}"
+    --mem="${SLURM_MEM_PER_NODE}"
+    --mem-per-cpu="${SLURM_MEM_PER_CPU}")
 # Filter out the empty arguments.
 SLURM_ARGS=()
 for ARG in "${SLURM_ALLARGS[@]}"

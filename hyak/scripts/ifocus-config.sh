@@ -15,8 +15,11 @@
 # The directory we use to store local data like unix sockets and job data.
 IFOCUS_PATH_DEFAULT="${HOME}/.i-focus"
 
-# If SLURM memory isn't specified, we go with 12G.
+# If SLURM memory isn't specified, we go with 12GB per node.
+# Only one of these two variables should be defined; that one is used as the
+# default when they are resolved.
 SLURM_MEM_PER_NODE_DEFAULT=12G
+SLURM_MEM_PER_CPU_DEFAULT=""
 
 # If the number of nodes, tasks, or cpus isn't specified, request 4 cpus for 1
 # node and 1 task.

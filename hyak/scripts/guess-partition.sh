@@ -19,19 +19,19 @@ PREFERRED_PARTITIONS=(
     ['escience']='ckpt-all'
     ['psych']='cpu-g2-mem2x')
 
-# Utility function for erroring out.
-function die { echo "ERROR: $*" 1>&2; exit 1; }
-
 
 # Logic ########################################################################
 
 # This script requires the account as the first argument
-[ -z "$1" ] \
-    && die "The account name is required as an argument to guess-partition.sh."
-ACCOUNT="$1"
+if [ -z "$1" ]
+then echo "WARNING: No account name given to guess-partition.sh." 2>&1
+     echo "         Defaulting to partition ckpt-all." 2>&1
+     echo "ckpt-all"
+     exit 0
+fi
 
 # See if we have a preferred partition for our account.
-PREFERRED_PARTITION="${PREFERRED_PARTITIONS[${ACCOUNT}]}"
+PREFERRED_PARTITION="${PREFERRED_PARTITIONS[$1]}"
 if [ -n "${PREFERRED_PARTITION}" ]
 then echo "${PREFERRED_PARTITION}"
      exit 0
