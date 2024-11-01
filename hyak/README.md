@@ -256,6 +256,9 @@ connection to the Jupyter instance, but it will continue running for as much
 time as you requested, so long-running jobs can be started in Jupyter then left
 on Hyak in this way.
 
+For more information on the `screen` utility, see the [Using
+Screen](#using-screen) section below.
+
 
 ## Using Hyak
 
