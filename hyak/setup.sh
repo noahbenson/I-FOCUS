@@ -13,6 +13,22 @@ BASEDIR="${HOME}/.i-focus"
 BINDIR="${BASEDIR}/bin"
 mkdir -p "${BINDIR}" \
     || die "Could not create directory ${BINDIR}"
+# We also want to remove the ~/.hyak-jupyter/tunnels directory and link it to
+# the ~/.i-focus/work/jupyter directory.
+JUPYTERDIR="${HOME}/.hyak-jupyter"
+LINKDIR="${HOME}/.hyak-jupyter/tunnels"
+FROMDIR="${BASEDIR}/work/jupyter"
+mkdir -p "${FROMDIR}" \
+    || die "Could not create directory ${FROMDIR}"
+if ! [ -d "${JUPYTERDIR}" ]
+then mkdir -p "${JUPYTERDIR}" \
+        || die "Could not create directory ${JUPYTERDIR}"
+elif [ -d "${LINKDIR}" ]
+then rm "${LINKDIR}"
+fi
+if ! [ -L "${LINKDIR}" ]
+then ln -s "${FROMDIR}" "${LINKDIR}"
+fi
 
 # Figure out what directory this script is in:
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
