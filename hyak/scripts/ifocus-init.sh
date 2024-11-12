@@ -152,9 +152,11 @@ do case "$1" in
            SLURM_MEM_PER_CPU="$2"
            shift
            shift
+	   ;;
        --mem-per-cpu=*)
            SLURM_MEM_PER_CPU="${1:14}"
            shift
+	   ;;
        -N|--nodes)
            SLURM_NNODES="$2"
            shift
@@ -256,6 +258,15 @@ IFOCUS_STATUS_FILE="${IFOCUS_WORK_PATH}/status"
 # If no timelimit was given, we error out.
 [ -z "${SLURM_TIMELIMIT}" ] \
     && die "No time-limit given; use --time=H:MM:SS or -t H:MM:SS"
+
+# If an IFOCUS_IMAGE was given but it isn't a filename, we check the images
+# temporary directory.
+if [ -n "${IFOCUS_IMAGE}" ] && ! [ -f "${IFOCUS_IMAGE}" ]
+then if [ -f "${IFOCUS_IMAGETMP_PATH}/${IFOCUS_IMAGE}.sif" ]
+     then IFOCUS_IMAGE="${IFOCUS_IMAGETMP_PATH}/${IFOCUS_IMAGE}.sif"
+     else die "No such image file: ${IFOCUS_IMAGE}"
+     fi
+fi
 
 # If IFOCUS_SCREEN isn't set, its default value is <command>-<tag> or
 # just <command> if tag isn't set.

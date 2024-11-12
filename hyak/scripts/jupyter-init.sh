@@ -25,14 +25,17 @@ PATH="${SCRIPT_PATH}:${PATH}"
 # script.
 export IFOCUS_COMMAND="jupyter"
 
+# We have a default image we wish to use, assuming IFOCUS_IMAGE isn't otherwise
+# set and isn't given in the command-line arguments. We put this before the
+# ifocus-init.sh script so that it processes the argument (i.e., looks in the
+# images directory for image files).
+#IFOCUS_IMAGE_DEFAULT="docker://quay.io/jupyter/datascience-notebook:2024-10-02"
+IFOCUS_IMAGE_DEFAULT="jupyter:default"
+IFOCUS_IMAGE="${IFOCUS_IMAGE:-${IFOCUS_IMAGE_DEFAULT}}"
+
 # Run and evaluate the ifocus-init.sh script.
 IFOCUS_INIT="$(ifocus-init.sh "$@")" || exit 1
 eval "${IFOCUS_INIT}"
-
-# We have a default image we wish to use, assuming IFOCUS_IMAGE wasn't already
-# set or wasn't set in the command arguments.
-IFOCUS_IMAGE_DEFAULT="docker://quay.io/jupyter/datascience-notebook:2024-10-02"
-IFOCUS_IMAGE="${IFOCUS_IMAGE:-${IFOCUS_IMAGE_DEFAULT}}"
 
 # The jupyter subcommand (lab or notebook).
 IFOCUS_JUPYTER_CMD_DEFAULT="lab"
