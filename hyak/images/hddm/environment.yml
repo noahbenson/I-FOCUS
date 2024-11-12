@@ -9,9 +9,9 @@ dependencies:
   - scipy=1.5.3
   - statsmodels=0.12.2
   - jupyter
-  - jupyterlab
   - matplotlib=3.3.4
   - seaborn=0.11.2
+  - nibabel
   - pip
   - pip:
       - cloudpickle==2.2.1

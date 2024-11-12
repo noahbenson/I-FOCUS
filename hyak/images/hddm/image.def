@@ -9,6 +9,7 @@ IncludeCmd: yes
 
 %files
     environment.yml /home/jovyan/hddm36_env.yml
+    jupyter.sh /usr/local/bin/jupyter
 
 %environment
     #export FREESURFER_HOME=/opt/freesurfer
@@ -20,6 +21,7 @@ IncludeCmd: yes
     # the bootstrap/base has been created and setup.
     # --
     # Install utilities.
+    chmod 755 /usr/local/bin/jupyter
     export DEBIAN_FRONTEND=noninteractive
     export TZ=US/Pacific
     ln -fs /usr/share/zoneinfo/US/Pacific /etc/localtime
