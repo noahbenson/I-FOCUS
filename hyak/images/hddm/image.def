@@ -1,0 +1,67 @@
+Bootstrap: docker
+From: mambaorg/micromamba:ubuntu20.04
+IncludeCmd: yes
+
+%setup
+    # This is a scriptlet that will be executed on the host, as root, after the
+    # container has been bootstrapped. To install things into the container
+    # reference the file system location with $APPTAINER_ROOTFS.
+
+%files
+    environment.yml /home/jovyan/hddm36_env.yml
+
+%environment
+    #export FREESURFER_HOME=/opt/freesurfer
+    #export SUBJECTS_DIR=/opt/freesurfer/subjects
+    export ENV_NAME=hddm36
+
+%post
+    # This scriptlet section will be executed from within the container after
+    # the bootstrap/base has been created and setup.
+    # --
+    # Install utilities.
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ=US/Pacific
+    ln -fs /usr/share/zoneinfo/US/Pacific /etc/localtime
+    apt-get update -y
+    apt-get install build-essential software-properties-common -y
+    apt-get install -y \
+            gfortran \
+	    curl \
+	    wget \
+	    nano-tiny \
+	    git \
+	    unzip \
+	    bzip2 \
+	    ca-certificates \
+	    locales \
+	    liblapack-dev \
+	    libopenblas-dev \
+	    tzdata
+
+    # Install FreeSurfer.
+    #cd /opt
+    #wget https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/7.4.1/freesurfer-linux-centos8_x86_64-7.4.1.tar.gz
+    #tar zxf freesurfer-linux-centos8_x86_64-7.4.1.tar.gz
+    #rm freesurfer-linux-centos8_x86_64-7.4.1.tar.gz
+    #ln -s /home/jovyan/.fslicense /opt/freesurfer/license.txt
+    # Install our libraries into the conda environment.
+    /usr/local/bin/_entrypoint.sh \
+        micromamba env create -f /home/jovyan/hddm36_env.yml
+
+%test
+    # Define any test commands that should be executed after container has been
+    # built. This scriptlet will be executed from within the running container
+    # as the root user. Pay attention to the exit/return value of this scriptlet
+    # as any non-zero exit code will be assumed as failure.
+    #micromamba activate hddm36 \
+    # && python -c 'import hddm' \
+    # && python -c 'import jupyter' \
+    # && exit 0 \
+    # || exit 1
+
+%help
+    This DEF file builds the Jupyter image used for the I-FOCUS project
+    with the HDDM library included.
+    To edit the configuration of this image, the best way is to edit the
+    environment.yml conda environment file in the same directory.

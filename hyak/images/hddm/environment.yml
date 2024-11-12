@@ -1,0 +1,19 @@
+name: hddm36
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.6
+  - numpy=1.19.5
+  - pandas=1.1.5
+  - scipy=1.5.3
+  - statsmodels=0.12.2
+  - jupyter
+  - jupyterlab
+  - matplotlib=3.3.4
+  - seaborn=0.11.2
+  - pip
+  - pip:
+      - cloudpickle==2.2.1
+      - hddm==0.8.0
+      - kabuki==0.6.5

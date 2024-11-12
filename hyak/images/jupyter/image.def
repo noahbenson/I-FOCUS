@@ -8,8 +8,7 @@ IncludeCmd: yes
     # reference the file system location with $APPTAINER_ROOTFS.
 
 %files
-    #jupyter_env.yml /home/jovyan/build_env.yml
-    jupyter_reqs.txt /home/jovyan/build_reqs.txt
+    requirements.txt /home/jovyan/image_reqs.txt
 
 %environment
     export FREESURFER_HOME=/opt/freesurfer
@@ -26,8 +25,7 @@ IncludeCmd: yes
     rm freesurfer-linux-centos8_x86_64-7.4.1.tar.gz
     ln -s /home/jovyan/.fslicense /opt/freesurfer/license.txt
     # Install our libraries into the conda environment.
-    #conda env update --file /home/jovyan/build_env.yml --prune
-    pip install -r /home/jovyan/build_reqs.txt
+    pip install -r /home/jovyan/image_reqs.txt
 
 %test
     # Define any test commands that should be executed after container has been
