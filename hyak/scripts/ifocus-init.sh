@@ -8,7 +8,12 @@
 # any of the environment variables are already set, those values are used by
 # default.
 
-function die { echo "ERROR: $*" 1>&2; exit 1; }
+function die {
+    # We use a special version of die since this script is really more of a
+    # subfunction whose output is run in external scripts.
+    echo "die '$*'"
+    exit 1
+}
 
 
 # Configuration ################################################################
