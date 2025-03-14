@@ -10,8 +10,8 @@
 # Utilities ####################################################################
 
 function die {
-    echo "die '$*'";
-    exit 1;
+    echo "ERROR (jupyter-init.sh): '$*'" 1>&2
+    exit 1
 }
 
 
@@ -38,7 +38,11 @@ IFOCUS_IMAGE="${IFOCUS_IMAGE:-${IFOCUS_IMAGE_DEFAULT}}"
 
 # Run and evaluate the ifocus-init.sh script.
 IFOCUS_INIT="$(ifocus-init.sh "$@")"
-eval "${IFOCUS_INIT}"
+RVAL="$?"
+if [ $RVAL != 0 ]
+then exit $RVAL
+else eval "${IFOCUS_INIT}"
+fi
 
 # The jupyter subcommand (lab or notebook).
 IFOCUS_JUPYTER_CMD_DEFAULT="lab"

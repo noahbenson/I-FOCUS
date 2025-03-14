@@ -11,7 +11,12 @@
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
 # Initialize the Jupyter data from the script directory.
-eval "$(${SCRIPT_DIR}/jupyter-init.sh "$@")"
+JUPYTER_INIT="$(${SCRIPT_DIR}/jupyter-init.sh "$@")"
+RVAL="$?"
+if [ $RVAL != 0 ]
+then exit $RVAL
+else eval "${JUPYTER_INIT}"
+fi
 
 
 # Check the Job Directory ######################################################

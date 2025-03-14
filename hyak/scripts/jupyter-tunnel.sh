@@ -8,7 +8,10 @@
 # Utilities ####################################################################
 
 # A function to print an error then exit with an error code.
-function die { echo "ERROR:" "$@" 1>&2; exit 1; }
+function die {
+    echo "ERROR (jupyter-tunnel.sh):" "$@" 1>&2;
+    exit 1;
+}
 
 
 # Configuration ################################################################

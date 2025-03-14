@@ -10,7 +10,7 @@
 
 # A function to print an error then exit with an error code.
 function die {
-    echo "ERROR:" "$@" 1>&2
+    echo "ERROR (hyak-jupyter):" "$@" 1>&2
     exit 1
 }
 
@@ -33,40 +33,47 @@ PATH="${IFOCUS_BIN_PATH}:${PATH}"
 # and the jupyter-init.sh script, both in the IFOCUS_BIN_PATH.
 # The jupyter-init.sh script runs the ifocus-init.sh script and exports all of
 # its variables, so only the latter is required.
-eval "$(jupyter-init.sh "$@")"
+JUPYTER_INIT="$(jupyter-init.sh "$@")"
+RVAL="$?"
+if [ $RVAL != 0 ]
+then exit $RVAL
+else eval "${JUPYTER_INIT}"
+fi
 
 
 # Sanity Checking ##############################################################
 
 # If Jupyter is already running, just error out right away.
-query=$(jupyter-query.sh "$@") && {
-    eval "${query}"
-    echo "Jupyter is already running with SLURM job id ${SLURM_JOB_ID}"
-    echo "on screen ${IFOCUS_SCREEN}."
-    echo "If you wish to reattach that screen, then select n (do not kill"
-    echo "this job) then use the command: screen -x ${IFOCUS_SCREEN@Q}"
-    echo ""
-    read -p "Kill this job and restart Jupyter (y/[n])? " RESTART_SCREEN
-    if   [ "${RESTART_SCREEN}" != "y" ] && [ "${RESTART_SCREEN}" != "Y" ]
-    then exit 1
-    fi
-    scancel "${SLURM_JOB_ID}"
-    screen -S "${IFOCUS_SCREEN}" -X quit &>/dev/null
-    ii=0
-    while ifocus_isrunning && [ $ii -lt 5 ]
-    do sleep 2; ii=$(( $ii + 1 ))
-    done
-    if [ -w "${IFOCUS_STATUS_FILE}" ]
-    then echo "WARNING: `scancel ${SLURM_JOB_ID}` didn't clear status file:"
-         echo "         ${IFOCUS_STATUS_FILE}"
-         echo ""
-         read -p "Manually delete status file (y/[n])? " DELETE_STATUS
-         if [ "${DELETE_STATUS}" != "y" ] && [ "${DELETE_STATUS}" != "Y" ]
-         then exit 1
-         fi
-         rm -f "${IFOCUS_STATUS_FILE}"
-    fi
-}
+query=$(jupyter-query.sh "$@")
+RVAL="$?"
+if [ $RVAL = 0 ]
+then eval "${query}"
+     echo "Jupyter is already running with SLURM job id ${SLURM_JOB_ID}"
+     echo "on screen ${IFOCUS_SCREEN}."
+     echo "If you wish to reattach that screen, then select n (do not kill"
+     echo "this job) then use the command: screen -x ${IFOCUS_SCREEN@Q}"
+     echo ""
+     read -p "Kill this job and restart Jupyter (y/[n])? " RESTART_SCREEN
+     if   [ "${RESTART_SCREEN}" != "y" ] && [ "${RESTART_SCREEN}" != "Y" ]
+     then exit 1
+     fi
+     scancel "${SLURM_JOB_ID}"
+     screen -S "${IFOCUS_SCREEN}" -X quit &>/dev/null
+     ii=0
+     while ifocus_isrunning && [ $ii -lt 5 ]
+     do sleep 2; ii=$(( $ii + 1 ))
+     done
+     if [ -w "${IFOCUS_STATUS_FILE}" ]
+     then echo "WARNING: `scancel ${SLURM_JOB_ID}` didn't clear status file:"
+          echo "         ${IFOCUS_STATUS_FILE}"
+          echo ""
+          read -p "Manually delete status file (y/[n])? " DELETE_STATUS
+          if [ "${DELETE_STATUS}" != "y" ] && [ "${DELETE_STATUS}" != "Y" ]
+          then exit 1
+          fi
+          rm -f "${IFOCUS_STATUS_FILE}"
+     fi
+fi
 
 # At this point, if we are not in a screen, put us in one.
 if [ -z "$STY" ]

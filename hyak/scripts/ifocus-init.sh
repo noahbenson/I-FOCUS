@@ -11,7 +11,7 @@
 function die {
     # We use a special version of die since this script is really more of a
     # subfunction whose output is run in external scripts.
-    echo "die '$*'"
+    echo "ERROR (ifocus-init.sh): $@" 1>&2
     exit 1
 }
 
@@ -267,9 +267,9 @@ IFOCUS_STATUS_FILE="${IFOCUS_WORK_PATH}/status"
 # If an IFOCUS_IMAGE was given but it isn't a filename, we check the images
 # temporary directory.
 if [ -n "${IFOCUS_IMAGE}" ] && ! [ -f "${IFOCUS_IMAGE}" ]
-then if [ -f "${IFOCUS_IMAGETMP_PATH}/${IFOCUS_IMAGE}.sif" ]
-     then IFOCUS_IMAGE="${IFOCUS_IMAGETMP_PATH}/${IFOCUS_IMAGE}.sif"
-     else die "No such image file: ${IFOCUS_IMAGE}"
+then if [ -f "${IFOCUS_IMAGE_PATH}/${IFOCUS_IMAGE}.sif" ]
+     then IFOCUS_IMAGE="${IFOCUS_IMAGE_PATH}/${IFOCUS_IMAGE}.sif"
+     else die "No such image file: ${IFOCUS_IMAGE_PATH}/${IFOCUS_IMAGE}.sif"
      fi
 fi
 

@@ -12,11 +12,14 @@
 # path of the other scripts. It is included here for reference:
 #  SCRIPT_PATH="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
+# The IFOCUS core path (in the gscratch permanent storage):
+IFOCUS_STORAGE_PATH="/mmfs1/gscratch/fang"
+
 # The IFOCUS tmp directory path (in the scrubbed directories):
 IFOCUS_TMP_PATH="/gscratch/scrubbed/i-focus"
 
 # The directory in which the images are saved.
-IFOCUS_IMAGETMP_PATH="${IFOCUS_TMP_PATH}/images"
+IFOCUS_IMAGE_PATH="${IFOCUS_STORAGE_PATH}/images"
 
 # The directory we use to store local data like unix sockets and job data.
 IFOCUS_PATH_DEFAULT="${HOME}/.i-focus"

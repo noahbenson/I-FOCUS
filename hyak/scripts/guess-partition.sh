@@ -13,11 +13,15 @@
 
 # Configuration ################################################################
 
+# The partition we use if we can't figure out a "coprrect" one:
+IFOCUS_DEFAULT_PARTITION="cpu-g2"
+
 # We prefer these accounts in this order if multiple accounts are available:
 declare -A PREFERRED_PARTITIONS
 PREFERRED_PARTITIONS=(
     ['escience']='ckpt-all'
-    ['psych']='cpu-g2-mem2x')
+    ['psych']='cpu-g2-mem2x'
+    ['fang']='cpu-g2')
 
 
 # Logic ########################################################################
@@ -25,8 +29,8 @@ PREFERRED_PARTITIONS=(
 # This script requires the account as the first argument
 if [ -z "$1" ]
 then echo "WARNING: No account name given to guess-partition.sh." 2>&1
-     echo "         Defaulting to partition ckpt-all." 2>&1
-     echo "ckpt-all"
+     echo "         Defaulting to partition ${IFOCUS_DEFAULT_PARTITION}." 2>&1
+     echo "${IFOCUS_DEFAULT_PARTITION}"
      exit 0
 fi
 
@@ -38,5 +42,5 @@ then echo "${PREFERRED_PARTITION}"
 fi
 
 # If not, we'll just guess ckpt-all.
-echo "ckpt-all"
+echo "${IFOCUS_DEFAULT_PARTITION}"
 exit 0

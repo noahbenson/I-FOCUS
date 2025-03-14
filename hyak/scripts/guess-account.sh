@@ -12,7 +12,7 @@
 # Configuration ################################################################
 
 # We prefer these accounts in this order if multiple accounts are available:
-PREFERRED_ACCOUNTS=(escience psych forsyth)
+PREFERRED_ACCOUNTS=(fang escience psych)
 
 # We won't use these accounts:
 EXCLUDED_ACCOUNTS=(all test)
@@ -37,7 +37,7 @@ function inarray {
 
 # Function for printing an error message and exiting.
 function die {
-    echo "ERROR: $@" 1>&2
+    echo "ERROR (guess-account.sh): $@" 1>&2
     exit 1
 }
 

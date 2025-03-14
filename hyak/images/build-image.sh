@@ -11,8 +11,11 @@ SCRIPT_PATH="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # The IFOCUS tmp directory path (in the scrubbed directories):
 IFOCUS_TMP_PATH="/gscratch/scrubbed/i-focus"
 
+# The IFOCUS storage directory:
+IFOCUS_PATH="/mmfs1/gscratch/fang"
+
 # The directory in which the images are saved.
-IFOCUS_IMAGE_PATH="${IFOCUS_TMP_PATH}/images"
+IFOCUS_IMAGE_PATH="${IFOCUS_PATH}/images"
 
 
 # Utilities ####################################################################
