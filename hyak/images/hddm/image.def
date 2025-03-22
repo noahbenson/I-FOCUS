@@ -51,6 +51,12 @@ IncludeCmd: yes
     /usr/local/bin/_entrypoint.sh \
         micromamba env create -f /home/jovyan/hddm36_env.yml
 
+    # Make links for the Hyak filesystem.
+    mkdir /scr /mmfs1
+    ln -s /mmfs1/gscratch /gscratch
+    ln -s /mmfs1/data /data
+    ln -s /mmfs1/sw /sw
+
 %test
     # Define any test commands that should be executed after container has been
     # built. This scriptlet will be executed from within the running container

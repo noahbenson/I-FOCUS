@@ -13,6 +13,7 @@ IncludeCmd: yes
 %environment
     export FREESURFER_HOME=/opt/freesurfer
     export SUBJECTS_DIR=/opt/freesurfer/subjects
+    export PATH=$PATH:/opt/freesurfer/bin
 
 %post
     # This scriptlet section will be executed from within the container after
@@ -26,6 +27,11 @@ IncludeCmd: yes
     ln -s /home/jovyan/.fslicense /opt/freesurfer/license.txt
     # Install our libraries into the conda environment.
     pip install -r /home/jovyan/image_reqs.txt
+    # Make links for the Hyak filesystem.
+    mkdir /scr /mmfs1
+    ln -s /mmfs1/gscratch /gscratch
+    ln -s /mmfs1/data /data
+    ln -s /mmfs1/sw /sw
 
 %test
     # Define any test commands that should be executed after container has been
